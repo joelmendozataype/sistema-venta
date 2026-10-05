@@ -38,7 +38,8 @@ document.addEventListener("DOMContentLoaded", function() {
             right: "dayGridMonth timeGridWeek listWeek",
         },
         events: base_url + "apartados/listarApartados",
-        editable: true,
+        // arrastrar eventos no se guardaba en la base de datos
+        editable: false,
         dateClick: function(info) {
             //console.log(info);
             document.getElementById("id").value = "";
@@ -58,32 +59,34 @@ document.addEventListener("DOMContentLoaded", function() {
                     console.log(this.responseText);
                     const res = JSON.parse(this.responseText);
                     const deuda = parseFloat(res.total) - parseFloat(res.abono);
+                    if (res.estado == 0) {
+                        Swal.fire("Entregado", "Los productos de " + info.event.title + " ya fueron entregados. Total: " + parseFloat(res.total).toFixed(2), "info");
+                        return;
+                    }
+                    if (res.estado == 2) {
+                        Swal.fire("Anulado", "Este apartado fue anulado y sus productos volvieron al stock.", "info");
+                        return;
+                    }
                     Swal.fire({
-                        title: "Mensaje?",
-                        text: "Entregar los productos al cliente: " +
-                            info.event.title +
-                            " DUEDA: " +
-                            deuda.toFixed(2),
-                        icon: "warning",
+                        title: "Apartado pendiente",
+                        text: "Cliente: " + info.event.title +
+                            ". Total: " + parseFloat(res.total).toFixed(2) +
+                            ", anticipo: " + parseFloat(res.abono).toFixed(2) +
+                            ". Saldo a cobrar al entregar: " + deuda.toFixed(2),
+                        icon: "question",
                         showCancelButton: true,
+                        showDenyButton: true,
                         confirmButtonColor: "#3085d6",
-                        cancelButtonColor: "#d33",
-                        confirmButtonText: "Si!",
-                        cancelButtonText: "No",
+                        denyButtonColor: "#d33",
+                        confirmButtonText: "Entregar",
+                        denyButtonText: "Anular apartado",
+                        cancelButtonText: "Cerrar",
                     }).then((result) => {
+                        const id_apartado = info.event.id;
                         if (result.isConfirmed) {
-                            const id_apartado = info.event.id;
-                            const url = base_url + "apartados/entrega/" + id_apartado;
-                            const http = new XMLHttpRequest();
-                            http.open("GET", url, true);
-                            http.send();
-                            http.onreadystatechange = function() {
-                                if (this.readyState == 4 && this.status == 200) {
-                                    const res = JSON.parse(this.responseText);
-                                    alertas(res.msg, res.icono);
-                                    calendar.refetchEvents();
-                                }
-                            };
+                            peticionApartado("apartados/entrega/" + id_apartado, null, calendar);
+                        } else if (result.isDenied) {
+                            anularApartado(id_apartado, parseFloat(res.abono), calendar);
                         }
                     });
                 }
@@ -167,6 +170,50 @@ function cantidadApartado(id, e) {
                 alertas(res.msg, res.icono);
             }
             cargarDetalleApart();
+        }
+    };
+}
+
+// Anula un apartado: devuelve los productos al stock y pregunta si se devuelve el anticipo
+function anularApartado(id_apartado, anticipo, calendar) {
+    Swal.fire({
+        title: "¿Anular el apartado?",
+        icon: "warning",
+        html: "<p>Los productos volverán al stock." + (anticipo > 0 ? " Anticipo cobrado: <b>" + anticipo.toFixed(2) + "</b>" : "") + "</p>" +
+            '<textarea id="motivo_anular" class="swal2-textarea" maxlength="255" placeholder="Motivo (queda en la auditoría)"></textarea>' +
+            (anticipo > 0 ? '<label class="mt-2"><input type="checkbox" id="devolver_anticipo" checked> Devolver el anticipo al cliente (sale de la caja)</label>' : ""),
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        confirmButtonText: "Sí, anular",
+        cancelButtonText: "No",
+        preConfirm: () => {
+            const motivo = document.getElementById("motivo_anular").value.trim();
+            if (motivo.length < 10) {
+                Swal.showValidationMessage("El motivo debe tener al menos 10 caracteres");
+                return false;
+            }
+            const check = document.getElementById("devolver_anticipo");
+            return { motivo: motivo, devolver: check ? check.checked : false };
+        },
+    }).then((result) => {
+        if (result.isConfirmed) {
+            let data = new FormData();
+            data.append("devolver", result.value.devolver ? "1" : "");
+            data.append("motivo", result.value.motivo);
+            peticionApartado("apartados/anular/" + id_apartado, data, calendar);
+        }
+    });
+}
+
+function peticionApartado(ruta, data, calendar) {
+    const http = new XMLHttpRequest();
+    http.open(data ? "POST" : "GET", base_url + ruta, true);
+    http.send(data);
+    http.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+            const res = JSON.parse(this.responseText);
+            alertas(res.msg, res.icono);
+            calendar.refetchEvents();
         }
     };
 }

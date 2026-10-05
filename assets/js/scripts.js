@@ -53,11 +53,32 @@ $(function () {
             .find("> .dropdown-menu")
             .slideToggle(500, function () {
               update_sidebar_nicescroll();
+              mostrar_submenu($(this));
               return false;
             });
           return false;
         });
     }
+  };
+
+  // Al abrir un submenú que queda debajo del borde inferior, desplaza el menú para mostrarlo
+  var mostrar_submenu = function (submenu) {
+    if (!submenu.is(":visible")) return;
+    setTimeout(function () {
+      var sidebar = $(".main-sidebar");
+      var limite = sidebar.offset().top + sidebar.innerHeight();
+      var fin = submenu.offset().top + submenu.outerHeight() + 20;
+      if (fin > limite) {
+        var destino = sidebar.scrollTop() + (fin - limite);
+        var nice = sidebar.getNiceScroll(0);
+        if (nice && nice.doScrollTop) {
+          nice.resize();
+          nice.doScrollTop(destino, 300);
+        } else {
+          sidebar.animate({ scrollTop: destino }, 300);
+        }
+      }
+    }, 100);
   };
   sidebar_dropdown();
 

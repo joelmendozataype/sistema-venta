@@ -17,12 +17,14 @@ if ($data['cerrar_caja'] && !empty($data['datos'])) {
                 <thead>
                     <tr>
                         <th>Id</th>
-                        <th>Monto_inicial</th>
-                        <th>Monto_final</th>
-                        <th>Fecha_apertura</th>
-                        <th>Fecha_cierre</th>
-                        <th>Total ventas</th>
-                        <th>Monto Total</th>
+                        <th>Monto Inicial</th>
+                        <th>Contado + Cobros</th>
+                        <th>Fecha Apertura</th>
+                        <th>Fecha Cierre</th>
+                        <th>Cant. Ventas</th>
+                        <th>Ventas Crédito</th>
+                        <th>Cobros (créditos y apartados)</th>
+                        <th>Efectivo en Caja</th>
                         <th>Estado</th>
                     </tr>
                 </thead>
@@ -35,7 +37,7 @@ if ($data['cerrar_caja'] && !empty($data['datos'])) {
 
 <?php include "Views/templates/footer.php"; ?>
 
-<script src="<?php echo BASE_URL; ?>assets/js/modulos/apertura.js"></script>
+<script src="<?php echo asset('assets/js/modulos/apertura.js'); ?>"></script>
 
 </body>
 

@@ -5,10 +5,11 @@ class UsuariosModel extends Query
     {
         parent::__construct();
     }
-    public function getUsuario(string $correo, string $clave)
+    // Solo usuarios activos pueden iniciar sesión; la clave se verifica en el controlador
+    public function getUsuario(string $correo)
     {
-        $sql = "SELECT * FROM usuarios WHERE correo = '$correo' AND clave = '$clave'";
-        $data = $this->select($sql);
+        $sql = "SELECT * FROM usuarios WHERE correo = ? AND estado = 1";
+        $data = $this->select($sql, [$correo]);
         return $data;
     }
     public function getCajas()
@@ -25,14 +26,14 @@ class UsuariosModel extends Query
     }
     public function getUsuarios(int $estado)
     {
-        $sql = "SELECT u.id, u.nombre,u.correo, u.estado, c.caja FROM usuarios u INNER JOIN caja c WHERE u.id_caja = c.id AND u.estado = $estado";
-        $data = $this->selectAll($sql);
+        $sql = "SELECT u.id, u.nombre,u.correo, u.estado, c.caja FROM usuarios u INNER JOIN caja c WHERE u.id_caja = c.id AND u.estado = ?";
+        $data = $this->selectAll($sql, [$estado]);
         return $data;
     }
     public function registrarUsuario(string $nombre, string $correo, string $clave, int $id_caja)
     {
-        $vericar = "SELECT * FROM usuarios WHERE correo = '$correo'";
-        $existe = $this->select($vericar);
+        $vericar = "SELECT id FROM usuarios WHERE correo = ?";
+        $existe = $this->select($vericar, [$correo]);
         if (empty($existe)) {
             # code...
             $sql = "INSERT INTO usuarios(nombre, correo, clave, id_caja) VALUES (?,?,?,?)";
@@ -50,8 +51,8 @@ class UsuariosModel extends Query
     }
     public function modificarUsuario(string $nombre, string $correo, int $id_caja, int $id)
     {
-        $verficar = "SELECT * FROM usuarios WHERE correo = '$correo' AND id != $id";
-        $existe = $this->select($verficar);
+        $verficar = "SELECT id FROM usuarios WHERE correo = ? AND id != ?";
+        $existe = $this->select($verficar, [$correo, $id]);
         if (empty($existe)) {
             $sql = "UPDATE usuarios SET nombre = ?, correo=?, id_caja = ? WHERE id = ?";
             $datos = array($nombre, $correo, $id_caja, $id);
@@ -66,16 +67,21 @@ class UsuariosModel extends Query
         }
         return $res;
     }
+    public function existeCorreo(string $correo, int $id)
+    {
+        $sql = "SELECT id FROM usuarios WHERE correo = ? AND id != ?";
+        return !empty($this->select($sql, [$correo, $id]));
+    }
     public function editarUser(int $id)
     {
-        $sql = "SELECT * FROM usuarios WHERE id = $id";
-        $data = $this->select($sql);
+        $sql = "SELECT * FROM usuarios WHERE id = ?";
+        $data = $this->select($sql, [$id]);
         return $data;
     }
-    public function getPass(string $clave, int $id)
+    public function getPass(int $id)
     {
-        $sql = "SELECT * FROM usuarios WHERE clave = '$clave' AND id = $id";
-        $data = $this->select($sql);
+        $sql = "SELECT clave FROM usuarios WHERE id = ?";
+        $data = $this->select($sql, [$id]);
         return $data;
     }
     public function accionUser(int $estado, int $id)
@@ -100,8 +106,8 @@ class UsuariosModel extends Query
     }
     public function getDetallePermisos(int $id)
     {
-        $sql = "SELECT * FROM detalle_permisos WHERE id_usuario = $id";
-        $data = $this->selectAll($sql);
+        $sql = "SELECT * FROM detalle_permisos WHERE id_usuario = ?";
+        $data = $this->selectAll($sql, [$id]);
         return $data;
     }
     public function deletePermisos(int $id)
@@ -125,26 +131,26 @@ class UsuariosModel extends Query
     }
     public function verificarPermisos($id_user, $permiso)
     {
-        $sql = "SELECT p.id, p.permiso, d.* FROM permisos p INNER JOIN detalle_permisos d ON p.id = d.id_permiso WHERE d.id_usuario = $id_user AND p.permiso = '$permiso'";
-        $existe = $this->select($sql);
+        $sql = "SELECT p.id, p.permiso, d.* FROM permisos p INNER JOIN detalle_permisos d ON p.id = d.id_permiso WHERE d.id_usuario = ? AND p.permiso = ?";
+        $existe = $this->select($sql, [$id_user, $permiso]);
         return $existe;
     }
     public function listarPermisos($id_user)
     {
-        $sql = "SELECT p.id, p.permiso, d.id, d.id_usuario, d.id_permiso FROM permisos p INNER JOIN detalle_permisos d ON p.id = d.id_permiso WHERE d.id_usuario = $id_user";
-        $data = $this->selectAll($sql);
+        $sql = "SELECT p.id, p.permiso, d.id, d.id_usuario, d.id_permiso FROM permisos p INNER JOIN detalle_permisos d ON p.id = d.id_permiso WHERE d.id_usuario = ?";
+        $data = $this->selectAll($sql, [$id_user]);
         return $data;
     }
     public function getCorreo(string $correo)
     {
-        $sql = "SELECT * FROM usuarios WHERE correo = '$correo'";
-        $data = $this->select($sql);
+        $sql = "SELECT * FROM usuarios WHERE correo = ? AND estado = 1";
+        $data = $this->select($sql, [$correo]);
         return $data;
     }
     public function getToken(string $token)
     {
-        $sql = "SELECT * FROM usuarios WHERE token = '$token'";
-        $data = $this->select($sql);
+        $sql = "SELECT * FROM usuarios WHERE token = ? AND estado = 1";
+        $data = $this->select($sql, [$token]);
         return $data;
     }
     public function actualizarToken(string $token, string $correo)

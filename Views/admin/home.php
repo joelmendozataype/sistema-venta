@@ -226,7 +226,7 @@
 </div>
 <?php include "Views/templates/footer.php"; ?>
 
-<script src="<?php echo BASE_URL; ?>assets/js/modulos/home.js"></script>
+<script src="<?php echo asset('assets/js/modulos/home.js'); ?>"></script>
 
 </body>
 

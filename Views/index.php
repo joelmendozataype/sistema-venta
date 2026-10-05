@@ -39,7 +39,7 @@
                 <form id="frmLogin" class="form" onsubmit="frmLogin(event)" autocomplete="off">
                   <div class="form-group">
                     <label for="email">Email</label>
-                    <input type="email" class="form-control" name="correo" id="correo" value="admin@gmail.com" tabindex="1" required autofocus>
+                    <input type="email" class="form-control" name="correo" id="correo" tabindex="1" required autofocus>
                   </div>
                   <div class="form-group">
                     <div class="d-block">
@@ -50,7 +50,7 @@
                         </a>
                       </div>
                     </div>
-                    <input id="clave" type="password" class="form-control" name="clave" tabindex="2" value="admin" required>
+                    <input id="clave" type="password" class="form-control" name="clave" tabindex="2" required>
                   </div>
                   <div class="form-group float-end">
                     <button type="submit" class="btn btn-primary btn-lg btn-block" id="btnAccion" tabindex="4">
@@ -82,7 +82,7 @@
                       <i class="fas fa-envelope"></i>
                     </div>
                   </div>
-                  <input id="correo" class="form-control" type="email" name="correo" placeholder="Ingrese Email" required>
+                  <input id="correo_reset" class="form-control" type="email" name="correo" placeholder="Ingrese Email" required>
                 </div>
               </div>
               <div class="modal-footer">
@@ -101,15 +101,15 @@
   <!-- JS Libraies -->
   <!-- Page Specific JS File -->
   <!-- Template JS File -->
-  <script src="<?php echo BASE_URL; ?>assets/js/scripts.js"></script>
+  <script src="<?php echo asset('assets/js/scripts.js'); ?>"></script>
   <!-- Custom JS File -->
-  <script src="<?php echo BASE_URL; ?>assets/js/custom.js"></script>
+  <script src="<?php echo asset('assets/js/custom.js'); ?>"></script>
 
   <script src="<?php echo BASE_URL; ?>assets/js/sweetalert2.all.min.js"></script>
   <script>
     const base_url = '<?php echo BASE_URL; ?>';
   </script>
-  <script src="<?php echo BASE_URL; ?>assets/js/login.js"></script>
+  <script src="<?php echo asset('assets/js/login.js'); ?>"></script>
 </body>
 
 </html>

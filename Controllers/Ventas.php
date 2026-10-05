@@ -7,10 +7,6 @@ class Ventas extends Controller
     private $id_usuario;
     public function __construct()
     {
-        session_start();
-        if (empty($_SESSION['activo'])) {
-            header("location: " . BASE_URL);
-        }
         parent::__construct();
         $this->id_usuario = $_SESSION['id_usuario'];
     }
@@ -27,8 +23,12 @@ class Ventas extends Controller
     }
     public function agregarVenta($id_producto)
     {
-        $id = strClean($id_producto);
+        $id = intval($id_producto);
         $datos = $this->model->getProductos($id);
+        if (empty($datos) || $datos['estado'] != 1) {
+            echo json_encode(array('msg' => 'El producto no existe o está inactivo', 'icono' => 'warning'), JSON_UNESCAPED_UNICODE);
+            die();
+        }
         $id_usuario = $_SESSION['id_usuario'];
         $precio = $datos['precio_venta'];
         $cantidad = 1;
@@ -66,11 +66,18 @@ class Ventas extends Controller
     public function cantidadVenta()
     {
         if (isset($_POST['id']) && isset($_POST['cantidad'])) {
-            $id = strClean($_POST['id']);
+            $id = intval($_POST['id']);
             $cantidad = strClean($_POST['cantidad']);
             $temp = $this->model->detalle($id, 'detalle_temp');
+            if (empty($temp) || $temp['id_usuario'] != $this->id_usuario) {
+                $msg = array('msg' => 'El producto no está en tu venta', 'icono' => 'warning');
+                echo json_encode($msg, JSON_UNESCAPED_UNICODE);
+                die();
+            }
             $producto = $this->model->getProductos($temp['id_producto']);
-            if ($producto['cantidad'] >= $cantidad) {
+            if (!is_numeric($cantidad) || $cantidad <= 0) {
+                $msg = array('msg' => 'La cantidad debe ser mayor a 0', 'icono' => 'warning');
+            } else if ($producto['cantidad'] >= $cantidad) {
                 $data = $this->model->actualizarCantidad('detalle_temp', $cantidad, $id);
                 if ($data == 'ok') {
                     $msg = array('msg' => 'ok', 'icono' => 'success');
@@ -86,7 +93,12 @@ class Ventas extends Controller
     }
     public function deleteVenta($id)
     {
-        $data = $this->model->deleteDetalle('detalle_temp', $id);
+        $temp = $this->model->detalle(intval($id), 'detalle_temp');
+        if (empty($temp) || $temp['id_usuario'] != $this->id_usuario) {
+            echo json_encode(array('msg' => 'El producto no está en tu venta', 'icono' => 'warning'));
+            die();
+        }
+        $data = $this->model->deleteDetalle('detalle_temp', intval($id));
         if ($data == 'ok') {
             $msg = array('msg' => 'Producto eliminado', 'icono' => 'success');
         } else {
@@ -98,37 +110,51 @@ class Ventas extends Controller
     public function registrarVenta()
     {
         if (isset($_POST['id']) && isset($_POST['metodo'])) {
-            $id_cliente = (!empty($_POST['id'])) ? strClean($_POST['id']) : 1;
+            $id_cliente = (!empty($_POST['id'])) ? intval($_POST['id']) : 1;
+            $metodo = intval($_POST['metodo']);
             $verificar = $this->model->verificarCaja($this->id_usuario);
+            $detalle = $this->calcularTotal();
             if (empty($verificar)) {
                 $msg = array('msg' => 'La caja esta cerrada', 'icono' => 'warning');
+            } else if ($metodo != 1 && $metodo != 2) {
+                $msg = array('msg' => 'Selecciona un método de pago válido', 'icono' => 'warning');
+            } else if ($metodo == 2 && empty($_POST['id'])) {
+                // un crédito debe quedar a nombre de un cliente real para poder cobrarlo
+                $msg = array('msg' => 'Para vender a crédito busca y selecciona el cliente', 'icono' => 'warning');
+            } else if (empty($detalle['detalle'])) {
+                $msg = array('msg' => 'No hay productos en la venta', 'icono' => 'warning');
+            } else if (($sinStock = $this->sinStock($detalle['detalle'])) != '') {
+                // el stock pudo cambiar desde que se agregó al carrito (otra venta, ajuste)
+                $msg = array('msg' => 'Stock insuficiente: ' . $sinStock, 'icono' => 'warning');
             } else {
                 $fecha = date('Y-m-d');
                 $hora = date('H:i:s');
                 $serie = 1;
-                $metodo = $_POST['metodo'];
-                $detalle = $this->calcularTotal();
-                $data = $this->model->registraVenta($this->id_usuario, $id_cliente, $detalle['total'], $fecha, $hora, $serie, $metodo);
-                if ($data > 0) {
+                // venta, detalle, crédito, stock e inventario se guardan juntos o no se guarda nada
+                try {
+                    $this->model->iniciarTransaccion();
+                    $data = $this->model->registraVenta($this->id_usuario, $id_cliente, $detalle['total'], $fecha, $hora, $serie, $metodo);
+                    if (!($data > 0)) {
+                        throw new Exception('Error al realizar la venta');
+                    }
                     if ($metodo == 2) {
                         $this->model->registraCredito($detalle['total'], $data);
                     }
                     foreach ($detalle['detalle'] as $row) {
                         $cantidad = $row['cantidad'];
-                        $precio = $row['precio'];
                         $id_pro = $row['id_producto'];
-                        $this->model->registrarDetalleVenta($data, $id_pro, $cantidad, $precio, $fecha);
-                        $stock_actual = $this->model->getProductos($id_pro);
-                        $stock = $stock_actual['cantidad'] - $cantidad;
-                        $this->model->actualizarStock($stock, $id_pro);
+                        if (!$this->model->moverStock($id_pro, -$cantidad)) {
+                            throw new Exception('Stock insuficiente: ' . $row['descripcion']);
+                        }
+                        $this->model->registrarDetalleVenta($data, $id_pro, $cantidad, $row['precio'], $fecha);
                         $this->model->ingresarSalida($id_pro, $this->id_usuario, $cantidad, $fecha);
                     }
-                    $vaciar = $this->model->vaciarDetalle('detalle_temp', $this->id_usuario);
-                    if ($vaciar == 'ok') {
-                        $msg = array('msg' => 'Venta Generada', 'id' => $data, 'icono' => 'success');
-                    }
-                } else {
-                    $msg = array('msg' => 'Error al realizar la venta', 'icono' => 'error');
+                    $this->model->vaciarDetalle('detalle_temp', $this->id_usuario);
+                    $this->model->confirmar();
+                    $msg = array('msg' => 'Venta Generada', 'id' => $data, 'icono' => 'success');
+                } catch (Throwable $e) {
+                    $this->model->revertir();
+                    $msg = array('msg' => ($e instanceof PDOException) ? 'Error al realizar la venta' : $e->getMessage(), 'icono' => 'warning');
                 }
             }
         }
@@ -172,8 +198,7 @@ class Ventas extends Controller
     public function generarPdf($id_venta)
     {
         if (is_numeric($id_venta)) {
-            $perm = $this->model->verificarPermisos($this->id_usuario, "reporte_ventas");
-            if (!empty($perm) || $this->id_usuario == 1) {
+            if (Auth::puede(array("reporte_ventas", "nueva_venta"))) {
                 $empresa = $this->model->getEmpresa();
                 $productos = $this->model->getProVenta($id_venta);
                 if (empty($productos)) {
@@ -261,8 +286,7 @@ class Ventas extends Controller
     public function generarFactura($id_venta)
     {
         if (is_numeric($id_venta)) {
-            $perm = $this->model->verificarPermisos($this->id_usuario, "reporte_ventas");
-            if (!empty($perm) || $this->id_usuario == 1) {
+            if (Auth::puede(array("reporte_ventas", "nueva_venta"))) {
                 $empresa = $this->model->getEmpresa();
                 $productos = $this->model->getProVenta($id_venta);
                 if (empty($productos)) {
@@ -358,17 +382,51 @@ class Ventas extends Controller
     public function anularVenta($id)
     {
         if (isset($_GET)) {
+            $id = intval($id);
+            $venta = $this->model->getVenta($id);
             $existe = $this->model->getAnularVentas($id);
-            if (!empty($existe)) {
-                foreach ($existe as $row) {
-                    $stock = $this->model->getProductos($row['id_producto']);
-                    $cantidad = $stock['cantidad'] + $row['cantidad'];
-                    $this->model->actualizarStock($cantidad, $stock['id']);
-                }
-                $data = $this->model->anular('ventas', $id);
-                if ($data == 'ok') {
+            $motivo = motivoAuditoria();
+            if ($motivo === null) {
+                $msg = MSG_MOTIVO;
+            } else if (empty($venta) || $venta['estado'] != 1) {
+                // evita devolver el stock dos veces
+                $msg = array('msg' => 'La venta no existe o ya fue anulada', 'icono' => 'warning');
+            } else if (!empty($existe)) {
+                // devolución de stock, anulación de la venta y de su crédito: todo o nada
+                try {
+                    $this->model->iniciarTransaccion();
+                    $fecha = date('Y-m-d');
+                    foreach ($existe as $row) {
+                        $this->model->moverStock($row['id_producto'], $row['cantidad']);
+                        $this->model->ingresarEntrada($row['id_producto'], $this->id_usuario, $row['cantidad'], $fecha);
+                    }
+                    if ($this->model->anular('ventas', $id) != 'ok') {
+                        throw new Exception('Error al anular la venta');
+                    }
                     $msg = array('msg' => 'Venta anulada', 'icono' => 'success');
-                } else {
+                    $credito = $this->model->getCreditoVenta($id);
+                    if (!empty($credito)) {
+                        $this->model->anularCredito($credito['id']);
+                        $abonado = (float) $credito['abonado'];
+                        $msg['msg'] = 'Venta y crédito anulados';
+                        if ($abonado > 0) {
+                            $msg['msg'] .= '. El cliente ya había abonado ' . number_format($abonado, 2) . ', realiza la devolución';
+                            $msg['icono'] = 'info';
+                        }
+                    }
+                    $this->model->registrarAuditoria('anular_venta', $id, $motivo, array(
+                        'venta' => $id,
+                        'fecha_venta' => $venta['fecha'] . ' ' . $venta['hora'],
+                        'cliente' => $venta['cliente'],
+                        'total' => $venta['total'],
+                        'metodo' => $venta['metodo'] == 2 ? 'Crédito' : 'Contado',
+                        'productos' => count($existe),
+                        'credito_anulado' => !empty($credito),
+                        'abonado_a_devolver' => empty($credito) ? '0.00' : number_format((float) $credito['abonado'], 2, '.', ''),
+                    ));
+                    $this->model->confirmar();
+                } catch (Throwable $e) {
+                    $this->model->revertir();
                     $msg = array('msg' => 'Error al anular la venta', 'icono' => 'error');
                 }
             } else {
@@ -390,6 +448,18 @@ class Ventas extends Controller
             $result[] = str_pad($n, $digits, "0", STR_PAD_LEFT);
         }
         return $result;
+    }
+    // Devuelve los productos del carrito que ya no tienen stock suficiente
+    private function sinStock(array $detalle)
+    {
+        $faltantes = array();
+        foreach ($detalle as $row) {
+            $producto = $this->model->getProductos($row['id_producto']);
+            if (empty($producto) || $producto['estado'] != 1 || $producto['cantidad'] < $row['cantidad']) {
+                $faltantes[] = $row['descripcion'] . ' (disponible: ' . (empty($producto) ? 0 : $producto['cantidad']) . ')';
+            }
+        }
+        return implode(', ', $faltantes);
     }
     public function calcularTotal()
     {

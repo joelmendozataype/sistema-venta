@@ -31,6 +31,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 data: 'total_ventas',
             },
             {
+                data: 'ventas_credito',
+            },
+            {
+                data: 'total_abonos',
+            },
+            {
                 data: 'monto_total',
             },
             {
@@ -38,7 +44,7 @@ document.addEventListener('DOMContentLoaded', function() {
             },
         ],
         language: {
-            url: '//cdn.datatables.net/plug-ins/1.10.11/i18n/Spanish.json',
+            url: base_url + "assets/js/datatables-es.json",
         },
         createdRow: function(row, data, index) {
             //pintar una celda
@@ -126,6 +132,8 @@ document.addEventListener('DOMContentLoaded', function() {
 function arqueoCaja() {
     document.getElementById('title').textContent = 'Abrir Caja';
     document.getElementById('ocultar_campos').classList.add('d-none');
+    document.getElementById('id').value = '';
+    monto_inicial.readOnly = false;
     monto_inicial.value = '';
     btn.textContent = 'Abrir Caja';
     myModal.show();
@@ -140,12 +148,17 @@ function cerrarCaja() {
     http.onreadystatechange = function() {
         if (this.readyState == 4 && this.status == 200) {
             const res = JSON.parse(this.responseText);
-            monto_final.value = 0;
-            if (res.monto_total.total != null) {
-                monto_final.value = res.monto_total.total;
+            if (!res.inicial) {
+                alertas(res.msg ? res.msg : 'La caja esta cerrada', 'warning');
+                return;
             }
-            document.getElementById('total_ventas').value = res.total_ventas.total;
+            monto_final.value = res.ventas_contado;
+            document.getElementById('abonos').value = res.abonos + ' (' + res.cantidad_abonos + ' cobros)';
+            document.getElementById('ventas_credito').value = res.ventas_credito;
+            document.getElementById('total_ventas').value = res.total_ventas;
             monto_inicial.value = res.inicial.monto_inicial;
+            // al cerrar, el monto inicial es solo informativo
+            monto_inicial.readOnly = true;
             document.getElementById('monto_general').value = res.monto_general;
             document.getElementById('id').value = res.inicial.id;
             document.getElementById('ocultar_campos').classList.remove('d-none');

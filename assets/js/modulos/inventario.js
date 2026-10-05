@@ -47,7 +47,7 @@ document.addEventListener("DOMContentLoaded", function() {
             { data: "total_salidas" },
         ],
         language: {
-            url: "//cdn.datatables.net/plug-ins/1.10.11/i18n/Spanish.json",
+            url: base_url + "assets/js/datatables-es.json",
         },
         dom,
         buttons,
@@ -72,8 +72,12 @@ function registrarInventario(e) {
     const id = document.getElementById("id").value;
     const codigo = document.getElementById("buscarInventario").value;
     const agregar = document.getElementById("agregar").value;
+    const motivo = document.getElementById("motivo").value.trim();
     if (id == "" || codigo == "" || agregar == "") {
         alertas("Todo los campos con * son requerido", "warning");
+        return false;
+    } else if (motivo.length < 10) {
+        alertas("Indica el motivo del ajuste (mínimo 10 caracteres)", "warning");
         return false;
     } else {
         const url = base_url + "productos/registrarInventario";

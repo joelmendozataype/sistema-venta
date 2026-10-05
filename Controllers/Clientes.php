@@ -1,10 +1,6 @@
 <?php
 class Clientes extends Controller{
     public function __construct() {
-        session_start();
-        if (empty($_SESSION['activo'])) {
-            header("location: ".BASE_URL);
-        }
         parent::__construct();
     }
     public function index()
@@ -54,8 +50,8 @@ class Clientes extends Controller{
                 if (strlen($dni) < 8) {
                     $msg = array('msg' => 'La identidad debe contener un mínimo 8 caracteres', 'icono' => 'warning');
                 } else {
-                    if (strlen($nombre) < 10) {
-                        $msg = array('msg' => 'El nombre debe contener un mínimo 10 caracteres', 'icono' => 'warning');
+                    if (mb_strlen($nombre) < 3) {
+                        $msg = array('msg' => 'El nombre debe contener un mínimo 3 caracteres', 'icono' => 'warning');
                     } else {
                         if (strlen($telefono) < 9) {
                             $msg = array('msg' => 'El teléfono debe contener un minímo 9 caracteres', 'icono' => 'warning');
@@ -108,6 +104,11 @@ class Clientes extends Controller{
     }
     public function eliminar(int $id)
     {
+        if ($id == 1) {
+            $msg = array('msg' => 'El cliente general no se puede dar de baja, se usa en las ventas sin cliente', 'icono' => 'warning');
+            echo json_encode($msg, JSON_UNESCAPED_UNICODE);
+            die();
+        }
         $data = $this->model->accionCli(0, $id);
         if ($data == 1) {
             $msg = array('msg' => 'Cliente dado de baja', 'icono' => 'success');
@@ -131,14 +132,16 @@ class Clientes extends Controller{
     public function buscarCliente()
     {
         if (isset($_GET['cli'])) {
-            $data = $this->model->buscarCliente($_GET['cli']);
+            $data = $this->model->buscarCliente(trim($_GET['cli']));
             $datos = array();
             foreach ($data as $row) {
-                $data['id'] = $row['id'];
-                $data['label'] = $row['dni'] . ' - ' . $row['nombre'] . ' - ' . $row['direccion'];
-                $data['value'] = $row['nombre'];
-                $data['direccion'] = $row['direccion'];
-                array_push($datos, $data);
+                $datos[] = array(
+                    'id' => $row['id'],
+                    'label' => $row['dni'] . ' - ' . $row['nombre'] . ' - ' . $row['direccion'],
+                    'value' => $row['nombre'],
+                    'nombre' => $row['nombre'],
+                    'direccion' => $row['direccion'],
+                );
             }
             echo json_encode($datos, JSON_UNESCAPED_UNICODE);
             die();

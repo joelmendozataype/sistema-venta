@@ -3,10 +3,6 @@ class Cajas extends Controller
 {
     public function __construct()
     {
-        session_start();
-        if (empty($_SESSION['activo'])) {
-            header("location: " . BASE_URL);
-        }
         parent::__construct();
     }
     public function index()
@@ -133,18 +129,24 @@ class Cajas extends Controller
                         $msg = array('msg' => 'Error al abrir la caja', 'icono' => 'error');
                     }
                 } else {
-                    $monto_final = $this->model->getVentas($id_usuario);
-                    if ($monto_final['total'] == 0) {
-                        $msg = array('msg' => 'No pudes cerrar la caja sin ventas', 'icono' => 'warning');
+                    $arqueo = $this->calcularArqueo($id_usuario);
+                    if (empty($arqueo['inicial'])) {
+                        $msg = array('msg' => 'La caja ya esta cerrada', 'icono' => 'warning');
+                    } else if ($arqueo['total_ventas'] == 0 && $arqueo['cantidad_abonos'] == 0) {
+                        $msg = array('msg' => 'No puedes cerrar la caja sin ventas ni abonos', 'icono' => 'warning');
                     } else {
-                        $total_ventas = $this->model->getTotalVentas($id_usuario);
-                        $inicial = $this->model->getMontoInicial($id_usuario);
-                        $general = $monto_final['total'] + $inicial['monto_inicial'];
-                        $data = $this->model->actualizarArqueo($monto_final['total'], $fecha_apertura, $total_ventas['total'], $general, $inicial['id']);
-                        if ($data == "ok") {
+                        // el cierre y el marcado de ventas/cobros como cerrados van juntos
+                        try {
+                            $this->model->iniciarTransaccion();
+                            $data = $this->model->actualizarArqueo($arqueo['monto_final'], $fecha_apertura, $arqueo['total_ventas'], $arqueo['ventas_credito'], $arqueo['abonos'], $arqueo['monto_general'], $arqueo['inicial']['id']);
+                            if ($data != "ok") {
+                                throw new Exception('Error al cerrar la caja');
+                            }
                             $this->model->actualizarApertura($id_usuario);
+                            $this->model->confirmar();
                             $msg = array('msg' => 'Caja cerrada', 'icono' => 'success');
-                        } else {
+                        } catch (Throwable $e) {
+                            $this->model->revertir();
                             $msg = array('msg' => 'Error al cerrar la caja', 'icono' => 'error');
                         }
                     }
@@ -184,15 +186,72 @@ class Cajas extends Controller
         echo json_encode($msg, JSON_UNESCAPED_UNICODE);
         die();
     }
+    // Reporte de cierres de caja de todos los usuarios (permiso reporte_cajas)
+    public function reporte()
+    {
+        $data['usuarios'] = $this->model->getUsuariosConCierres();
+        $this->views->getView('cajas', "reporte", $data);
+    }
+    public function listarReporte()
+    {
+        $fecha = '/^\d{4}-\d{2}-\d{2}$/';
+        $desde = preg_match($fecha, $_GET['desde'] ?? '') ? $_GET['desde'] : date('Y-m-01');
+        $hasta = preg_match($fecha, $_GET['hasta'] ?? '') ? $_GET['hasta'] : date('Y-m-d');
+        $data = $this->model->getReporteCierres($desde, $hasta, intval($_GET['usuario'] ?? 0));
+        $totales = array('contado' => 0, 'credito' => 0, 'cobros' => 0, 'efectivo' => 0);
+        foreach ($data as $i => $row) {
+            if ($row['estado'] == 1) {
+                // caja aún abierta: montos calculados en vivo
+                $vivo = $this->calcularArqueo($row['id_usuario']);
+                $row['monto_final'] = $vivo['monto_final'];
+                $row['total_ventas'] = $vivo['total_ventas'];
+                $row['ventas_credito'] = $vivo['ventas_credito'];
+                $row['total_abonos'] = $vivo['abonos'];
+                $row['monto_total'] = $vivo['monto_general'];
+                $row['estado'] = '<span class="badge bg-success">Abierta (en vivo)</span>';
+            } else {
+                $row['estado'] = '<span class="badge bg-danger">Cerrada</span>';
+            }
+            $row['ventas_contado'] = number_format($row['monto_final'] - $row['total_abonos'], 2, '.', '');
+            $totales['contado'] += $row['ventas_contado'];
+            $totales['credito'] += $row['ventas_credito'];
+            $totales['cobros'] += $row['total_abonos'];
+            $totales['efectivo'] += $row['monto_total'];
+            $data[$i] = $row;
+        }
+        foreach ($totales as $k => $v) {
+            $totales[$k] = number_format($v, 2, '.', '');
+        }
+        echo json_encode(array('cierres' => $data, 'totales' => $totales), JSON_UNESCAPED_UNICODE);
+        die();
+    }
     public function getVentas()
     {
-        $id_usuario = $_SESSION['id_usuario'];
-        $data['monto_total'] = $this->model->getVentas($id_usuario);
-        $data['total_ventas'] = $this->model->getTotalVentas($id_usuario);
-        $data['inicial'] = $this->model->getMontoInicial($id_usuario);
-        $data['monto_general'] = $data['monto_total']['total'] + $data['inicial']['monto_inicial'];
+        $data = $this->calcularArqueo($_SESSION['id_usuario']);
         echo json_encode($data, JSON_UNESCAPED_UNICODE);
         die();
+    }
+    /*
+     * Efectivo en caja = monto inicial + ventas al contado + abonos cobrados.
+     * Las ventas a crédito se informan aparte: no son dinero recibido.
+     */
+    private function calcularArqueo(int $id_usuario)
+    {
+        $contado = (float) $this->model->getVentas($id_usuario)['total'];
+        $credito = (float) $this->model->getVentasCredito($id_usuario)['total'];
+        $abonos = $this->model->getAbonos($id_usuario);
+        $inicial = $this->model->getMontoInicial($id_usuario);
+        $monto_inicial = empty($inicial) ? 0 : (float) $inicial['monto_inicial'];
+        $total_abonos = (float) $abonos['total'];
+        $data['inicial'] = $inicial;
+        $data['ventas_contado'] = number_format($contado, 2, '.', '');
+        $data['ventas_credito'] = number_format($credito, 2, '.', '');
+        $data['abonos'] = number_format($total_abonos, 2, '.', '');
+        $data['cantidad_abonos'] = (int) $abonos['cantidad'];
+        $data['total_ventas'] = (int) $this->model->getTotalVentas($id_usuario)['total'];
+        $data['monto_final'] = number_format($contado + $total_abonos, 2, '.', '');
+        $data['monto_general'] = number_format($monto_inicial + $contado + $total_abonos, 2, '.', '');
+        return $data;
     }
     public function inactivos()
     {

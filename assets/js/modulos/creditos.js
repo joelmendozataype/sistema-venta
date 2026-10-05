@@ -18,7 +18,7 @@ document.addEventListener("DOMContentLoaded", function() {
             { data: "accion" },
         ],
         language: {
-            url: "//cdn.datatables.net/plug-ins/1.10.11/i18n/Spanish.json",
+            url: base_url + "assets/js/datatables-es.json",
         },
         dom,
         buttons,
@@ -46,7 +46,7 @@ document.addEventListener("DOMContentLoaded", function() {
             { data: "restante" }
         ],
         language: {
-            url: "//cdn.datatables.net/plug-ins/1.10.11/i18n/Spanish.json",
+            url: base_url + "assets/js/datatables-es.json",
         },
         dom,
         buttons,
@@ -59,28 +59,8 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 });
 
+// Consulta el saldo y pide el monto; el servidor vuelve a validar todo al registrar
 function btnAddAbono(id_credito) {
-    Swal.fire({
-        title: "MONTO A ABONAR",
-        input: "text",
-        inputAttributes: {
-            autocapitalize: "off",
-        },
-        showCancelButton: true,
-        confirmButtonText: "Abonar",
-        showLoaderOnConfirm: true,
-        preConfirm: (valor) => {
-            return valor;
-        },
-        allowOutsideClick: () => !Swal.isLoading(),
-    }).then((result) => {
-        if (result.isConfirmed) {
-            verificarMonto(id_credito, result.value);
-        }
-    });
-}
-
-function verificarMonto(id_credito, monto) {
     const url = base_url + "creditos/verificarMonto/" + id_credito;
     const http = new XMLHttpRequest();
     http.open("GET", url, true);
@@ -88,14 +68,33 @@ function verificarMonto(id_credito, monto) {
     http.onreadystatechange = function() {
         if (this.readyState == 4 && this.status == 200) {
             const res = JSON.parse(this.responseText);
-            if (res.restante >= monto) {
-                insertarAbono(id_credito, monto);
-            } else {
-                alertas("INGRESA UN MONTO MENOR O IGUAL A RESTANTE", "warning");
-                setTimeout(() => {
-                    btnAddAbono(id_credito);
-                }, 1500);
-            }
+            const restante = parseFloat(res.restante);
+            Swal.fire({
+                title: "MONTO A ABONAR",
+                text: "Falta pagar: " + restante.toFixed(2),
+                input: "number",
+                inputAttributes: {
+                    min: "0.01",
+                    max: restante.toFixed(2),
+                    step: "0.01",
+                },
+                showCancelButton: true,
+                confirmButtonText: "Abonar",
+                cancelButtonText: "Cancelar",
+                inputValidator: (valor) => {
+                    const monto = parseFloat(valor);
+                    if (isNaN(monto) || monto <= 0) {
+                        return "Ingresa un monto mayor a 0";
+                    }
+                    if (Math.round(monto * 100) > Math.round(restante * 100)) {
+                        return "El monto no puede ser mayor a " + restante.toFixed(2);
+                    }
+                },
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    insertarAbono(id_credito, parseFloat(result.value).toFixed(2));
+                }
+            });
         }
     };
 }

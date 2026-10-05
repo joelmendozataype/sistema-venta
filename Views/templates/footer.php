@@ -117,16 +117,16 @@
 <script src="<?php echo BASE_URL; ?>assets/js/sweetalert2.all.min.js"></script>
 <script src="<?php echo BASE_URL; ?>assets/js/chart.min.js"></script>
 <script src="<?php echo BASE_URL; ?>assets/js/global.js"></script>
-<script src="<?php echo BASE_URL; ?>assets/js/funciones.js"></script>
+<script src="<?php echo asset('assets/js/funciones.js'); ?>"></script>
 
 
 <!-- JS Libraies -->
 <script src="<?php echo BASE_URL; ?>assets/bundles/prism/prism.js"></script>
 <!-- Page Specific JS File -->
 <!-- Template JS File -->
-<script src="<?php echo BASE_URL; ?>assets/js/scripts.js"></script>
+<script src="<?php echo asset('assets/js/scripts.js'); ?>"></script>
 <!-- Custom JS File -->
-<script src="<?php echo BASE_URL; ?>assets/js/custom.js"></script>
+<script src="<?php echo asset('assets/js/custom.js'); ?>"></script>
 
 <script src="<?php echo BASE_URL; ?>assets/js/jquery.validate.min.js"></script>
 <script src="<?php echo BASE_URL; ?>assets/js/additional-methods.min.js"></script>

@@ -19,8 +19,8 @@ class AdministracionModel extends Query
     }
     public function getVentas(string $table, int $id_user)
     {
-        $sql = "SELECT COUNT(*) AS total FROM $table WHERE fecha = CURDATE() AND estado = 1 AND id_usuario = $id_user";
-        $data = $this->select($sql);
+        $sql = "SELECT COUNT(*) AS total FROM $table WHERE fecha = CURDATE() AND estado = 1 AND id_usuario = ?";
+        $data = $this->select($sql, [$id_user]);
         return $data;
     }
     public function modificar(string $ruc, string $nombre, string $tel, string $correo, string $dir, string $mensaje, string $img, int $moneda, int $impuesto, int $cant_factura, $site, int $id)
@@ -57,14 +57,17 @@ WHERE fecha BETWEEN '$desde' AND '$hasta' AND id_usuario = $id_user AND metodo =
     }
     public function getMontoCaja(int $id_user)
     {
-        $sql = "SELECT SUM(total) AS total FROM ventas WHERE id_usuario = $id_user AND estado = 1 AND apertura = 1";
-        $data = $this->select($sql);
+        // efectivo del turno: ventas al contado + abonos cobrados (las ventas a crédito no son efectivo)
+        $sql = "SELECT (SELECT COALESCE(SUM(total), 0) FROM ventas WHERE id_usuario = ? AND estado = 1 AND apertura = 1 AND metodo = 1)
+                     + (SELECT COALESCE(SUM(abono), 0) FROM abonos WHERE id_usuario = ? AND apertura = 1)
+                     + (SELECT COALESCE(SUM(monto), 0) FROM pagos_apartados WHERE id_usuario = ? AND apertura = 1) AS total";
+        $data = $this->select($sql, [$id_user, $id_user, $id_user]);
         return $data;
     }
     public function getMontoInicial(int $id_user)
     {
-        $sql = "SELECT id, monto_inicial FROM cierre_caja WHERE id_usuario = $id_user AND estado = 1";
-        $data = $this->select($sql);
+        $sql = "SELECT id, monto_inicial FROM cierre_caja WHERE id_usuario = ? AND estado = 1";
+        $data = $this->select($sql, [$id_user]);
         return $data;
     }
     public function getStockMinimo()
@@ -76,8 +79,8 @@ WHERE fecha BETWEEN '$desde' AND '$hasta' AND id_usuario = $id_user AND metodo =
     //Monedas
     public function registrarMoneda(string $simbolo, string $nom)
     {
-        $verficar = "SELECT * FROM moneda WHERE simbolo = '$simbolo'";
-        $existe = $this->select($verficar);
+        $verficar = "SELECT * FROM moneda WHERE simbolo = ?";
+        $existe = $this->select($verficar, [$simbolo]);
         if (empty($existe)) {
             $sql = "INSERT INTO moneda (simbolo, nombre) VALUES (?,?)";
             $datos = array($simbolo, $nom);
@@ -94,14 +97,14 @@ WHERE fecha BETWEEN '$desde' AND '$hasta' AND id_usuario = $id_user AND metodo =
     }
     public function getMonedas(int $estado)
     {
-        $sql = "SELECT * FROM moneda WHERE estado = $estado";
-        $data = $this->selectAll($sql);
+        $sql = "SELECT * FROM moneda WHERE estado = ?";
+        $data = $this->selectAll($sql, [$estado]);
         return $data;
     }
     public function modificarMoneda(string $simbolo, string $nombre, int $id)
     {
-        $verficar = "SELECT * FROM moneda WHERE simbolo = '$simbolo' AND id != $id";
-        $existe = $this->select($verficar);
+        $verficar = "SELECT * FROM moneda WHERE simbolo = ? AND id != ?";
+        $existe = $this->select($verficar, [$simbolo, $id]);
         if (empty($existe)) {
             $sql = "UPDATE moneda SET simbolo = ?, nombre = ? WHERE id = ?";
             $datos = array($simbolo, $nombre, $id);
@@ -118,8 +121,8 @@ WHERE fecha BETWEEN '$desde' AND '$hasta' AND id_usuario = $id_user AND metodo =
     }
     public function editarMoneda(int $id)
     {
-        $sql = "SELECT * FROM moneda WHERE id = $id";
-        $data = $this->select($sql);
+        $sql = "SELECT * FROM moneda WHERE id = ?";
+        $data = $this->select($sql, [$id]);
         return $data;
     }
     public function accionMoneda(int $estado, int $id)
@@ -137,8 +140,8 @@ WHERE fecha BETWEEN '$desde' AND '$hasta' AND id_usuario = $id_user AND metodo =
     }
     public function verificarPermisos($id_user, $permiso)
     {
-        $sql = "SELECT p.id, p.permiso, d.* FROM permisos p INNER JOIN detalle_permisos d ON p.id = d.id_permiso WHERE d.id_usuario = $id_user AND p.permiso = '$permiso'";
-        $existe = $this->select($sql);
+        $sql = "SELECT p.id, p.permiso, d.* FROM permisos p INNER JOIN detalle_permisos d ON p.id = d.id_permiso WHERE d.id_usuario = ? AND p.permiso = ?";
+        $existe = $this->select($sql, [$id_user, $permiso]);
         return $existe;
     }
     public function topProductos()

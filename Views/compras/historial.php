@@ -7,7 +7,7 @@
         <?php if ($data['existe']) { ?>
             <button class="btn btn-outline-danger mb-2" type="button" onclick="generarPdfCompra()"><i class="fas fa-file-pdf"></i></button>
         <?php }?>
-        <a class="btn btn-outline-warning mb-2" href="<?php echo BASE_URL; ?>compras/inactivos"><i class="fas fa-ban"></i></a>
+        <?php if (Auth::puedeRuta('compras', 'inactivos')) { ?><a class="btn btn-outline-warning mb-2" href="<?php echo BASE_URL; ?>compras/inactivos"><i class="fas fa-ban"></i></a><?php } ?>
         <div class="row mb-2">
             <div class="col-md-4">
                 <label for="">Desde</label>
@@ -45,7 +45,7 @@
 </div>
 <?php include "Views/templates/footer.php"; ?>
 
-<script src="<?php echo BASE_URL; ?>assets/js/modulos/historial_compras.js"></script>
+<script src="<?php echo asset('assets/js/modulos/historial_compras.js'); ?>"></script>
 
 </body>
 

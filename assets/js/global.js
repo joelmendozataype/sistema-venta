@@ -163,20 +163,31 @@ function eliminarRegistro(url, table) {
     });
 }
 
+// Anula una venta o compra pidiendo el motivo (queda en el registro de auditoría)
 function anular(url, table, nombre) {
     Swal.fire({
-        title: "Esta seguro de anular la " + nombre.toUpperCase(),
+        title: "¿Anular la " + nombre + "?",
+        text: "Indica el motivo. Quedará registrado en la auditoría con tu usuario.",
         icon: "warning",
+        input: "textarea",
+        inputPlaceholder: "Ej.: cliente devolvió el producto por falla",
+        inputAttributes: { maxlength: 255 },
         showCancelButton: true,
-        confirmButtonColor: "#3085d6",
-        cancelButtonColor: "#d33",
-        confirmButtonText: "Si!",
-        cancelButtonText: "No",
+        confirmButtonColor: "#d33",
+        confirmButtonText: "Anular",
+        cancelButtonText: "Cancelar",
+        inputValidator: (valor) => {
+            if (!valor || valor.trim().length < 10) {
+                return "El motivo debe tener al menos 10 caracteres";
+            }
+        },
     }).then((result) => {
         if (result.isConfirmed) {
+            let data = new FormData();
+            data.append("motivo", result.value.trim());
             const http = new XMLHttpRequest();
-            http.open("GET", url, true);
-            http.send();
+            http.open("POST", url, true);
+            http.send(data);
             http.onreadystatechange = function() {
                 if (this.readyState == 4 && this.status == 200) {
                     const res = JSON.parse(this.responseText);

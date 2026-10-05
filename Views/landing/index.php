@@ -31,7 +31,7 @@
 
 <?php include "Views/templates/footer.php"; ?>
 
-<script src="<?php echo BASE_URL; ?>assets/js/modulos/landing.js"></script>
+<script src="<?php echo asset('assets/js/modulos/landing.js'); ?>"></script>
 
 </body>
 

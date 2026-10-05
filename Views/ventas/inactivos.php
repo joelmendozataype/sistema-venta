@@ -30,6 +30,8 @@
                         <th>Fecha</th>
                         <th>Hora</th>
                         <th>Total</th>
+                        <th>Anulado por</th>
+                        <th>Motivo</th>
                         <th></th>
                     </tr>
                 </thead>
@@ -41,6 +43,8 @@
                             <td><?php echo $venta['fecha']; ?></td>
                             <td><?php echo $venta['hora']; ?></td>
                             <td><?php echo $venta['total']; ?></td>
+                            <td><?php echo htmlspecialchars($venta['anulado_por'] ?? 'Sin registro (anterior a la auditoría)'); ?></td>
+                            <td><?php echo htmlspecialchars($venta['motivo_anulacion'] ?? ''); ?></td>
                             <td><a href="#" class="btn btn-outline-danger" onclick="generarReportes(2,<?php echo $venta['id']; ?>)"><i class="fas fa-file-pdf"></i></a></td>
                         </tr>
                     <?php } ?>

@@ -5,3 +5,5 @@ Config/Config.php
 .vscode/
 .DS_Store
 Thumbs.db
+# Credenciales iniciales: nunca subir al repositorio
+DB/usuarios_iniciales.txt

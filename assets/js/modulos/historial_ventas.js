@@ -19,7 +19,7 @@ document.addEventListener("DOMContentLoaded", function() {
             { data: "reporte" },
         ],
         language: {
-            url: "//cdn.datatables.net/plug-ins/1.10.11/i18n/Spanish.json",
+            url: base_url + "assets/js/datatables-es.json",
         },
         dom,
         buttons,

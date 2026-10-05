@@ -3,10 +3,6 @@ class Landing extends Controller
 {
     public function __construct()
     {
-        session_start();
-        if (empty($_SESSION['activo'])) {
-            header("location: " . BASE_URL);
-        }
         parent::__construct();
     }
     public function index()
@@ -55,6 +51,8 @@ class Landing extends Controller
             $id = strClean($_POST['id']);
             if (empty($pagina) || empty($nombre) || empty($telefono) || empty($correo)) {
                 $msg = array('msg' => 'Todo los campos son obligatorios', 'icono' => 'warning');
+            } else if (!filter_var($correo, FILTER_VALIDATE_EMAIL)) {
+                $msg = array('msg' => 'Ingresa un correo valido', 'icono' => 'warning');
             } else {
                 if ($id == "") {
                     $data = $this->model->registrar($hora, $fecha, $pagina, $nombre, $telefono, $correo, $negocio);

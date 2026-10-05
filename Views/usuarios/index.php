@@ -3,7 +3,7 @@
 <?php if ($data['existe']) { ?>
     <button class="btn btn-outline-primary mb-2" type="button" onclick="frmUsuario();"><i class="fas fa-plus"></i></button>
 <?php } ?>
-<a class="btn btn-outline-warning mb-2" href="<?php echo BASE_URL; ?>usuarios/inactivos"><i class="fas fa-trash"></i></a>
+<?php if (Auth::puedeRuta('usuarios', 'inactivos')) { ?><a class="btn btn-outline-warning mb-2" href="<?php echo BASE_URL; ?>usuarios/inactivos"><i class="fas fa-trash"></i></a><?php } ?>
 <div class="card">
     <div class="card-body">
         <div class="table-responsive">
@@ -29,7 +29,7 @@
 
 <?php include "Views/templates/footer.php"; ?>
 
-<script src="<?php echo BASE_URL; ?>assets/js/modulos/usuario.js"></script>
+<script src="<?php echo asset('assets/js/modulos/usuario.js'); ?>"></script>
 
 </body>
 

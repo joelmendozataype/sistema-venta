@@ -7,22 +7,20 @@ class ProveedorModel extends Query
     }
     public function getProveedor(int $estado)
     {
-        $sql = "SELECT * FROM proveedor WHERE estado = $estado";
-        $data = $this->selectAll($sql);
+        $sql = "SELECT * FROM proveedor WHERE estado = ?";
+        $data = $this->selectAll($sql, [$estado]);
         return $data;
     }
     public function buscarProveedor(string $valor)
     {
-        $sql = "SELECT id, nombre, direccion FROM proveedor WHERE ruc LIKE '%" . $valor . "%' AND estado = 1 OR nombre LIKE '%" . $valor . "%' AND estado = 1";
-        $data = $this->selectAll($sql);
+        $sql = "SELECT id, ruc, nombre, direccion FROM proveedor WHERE estado = 1 AND (ruc LIKE ? OR nombre LIKE ?) LIMIT 20";
+        $data = $this->selectAll($sql, ["%$valor%", "%$valor%"]);
         return $data;
     }
     public function registrar(string $ruc, string $nombre, string $telefono, string $direccion)
     {
-        $verficarRuc = "SELECT * FROM proveedor WHERE ruc = '$ruc'";
-        $verficarTel = "SELECT * FROM proveedor WHERE telefono = '$telefono'";
-        $existeRuc = $this->select($verficarRuc);
-        $existeTel = $this->select($verficarTel);
+        $existeRuc = $this->select("SELECT id FROM proveedor WHERE ruc = ?", [$ruc]);
+        $existeTel = $this->select("SELECT id FROM proveedor WHERE telefono = ?", [$telefono]);
         if (!empty($existeRuc)) {
             $res = "ruc";
         }else if (!empty($existeTel)) {
@@ -41,10 +39,8 @@ class ProveedorModel extends Query
     }
     public function modificar(string $ruc, string $nombre, string $telefono, string $direccion, int $id)
     {
-        $verficarRuc = "SELECT * FROM proveedor WHERE ruc = '$ruc' AND id != $id";
-        $verficarTel = "SELECT * FROM proveedor WHERE telefono = '$telefono' AND id != $id";
-        $existeRuc = $this->select($verficarRuc);
-        $existeTel = $this->select($verficarTel);
+        $existeRuc = $this->select("SELECT id FROM proveedor WHERE ruc = ? AND id != ?", [$ruc, $id]);
+        $existeTel = $this->select("SELECT id FROM proveedor WHERE telefono = ? AND id != ?", [$telefono, $id]);
         if (!empty($existeRuc)) {
             $res = "ruc";
         }else if (!empty($existeTel)) {
@@ -63,8 +59,8 @@ class ProveedorModel extends Query
     }
     public function editarpr(int $id)
     {
-        $sql = "SELECT * FROM proveedor WHERE id = $id";
-        $data = $this->select($sql);
+        $sql = "SELECT * FROM proveedor WHERE id = ?";
+        $data = $this->select($sql, [$id]);
         return $data;
     }
     public function accionpr(int $estado, int $id)
@@ -76,8 +72,8 @@ class ProveedorModel extends Query
     }
     public function verificarPermisos($id_user, $permiso)
     {
-        $sql = "SELECT p.id, p.permiso, d.* FROM permisos p INNER JOIN detalle_permisos d ON p.id = d.id_permiso WHERE d.id_usuario = $id_user AND p.permiso = '$permiso'";
-        $existe = $this->select($sql);
+        $sql = "SELECT p.id, p.permiso, d.* FROM permisos p INNER JOIN detalle_permisos d ON p.id = d.id_permiso WHERE d.id_usuario = ? AND p.permiso = ?";
+        $existe = $this->select($sql, [$id_user, $permiso]);
         return $existe;
     }
 }

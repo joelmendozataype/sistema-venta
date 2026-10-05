@@ -3,10 +3,6 @@ class Medidas extends Controller
 {
     public function __construct()
     {
-        session_start();
-        if (empty($_SESSION['activo'])) {
-            header("location: " . BASE_URL);
-        }
         parent::__construct();
     }
     public function index()
@@ -117,7 +113,7 @@ class Medidas extends Controller
     public function inactivos()
     {
         $id_user = $_SESSION['id_usuario'];
-        $data['permisos'] = $this->model->verificarPermisos($id_user, "restaurar_medidas");
+        $data['permisos'] = $this->model->verificarPermisos($id_user, "restaurar_medida");
         if (!empty($data['permisos']) || $id_user == 1) {
             $data['existe'] = true;
         } else {

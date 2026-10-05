@@ -45,7 +45,7 @@
 </div>
 <?php include "Views/templates/footer.php"; ?>
 
-<script src="<?php echo BASE_URL; ?>assets/js/modulos/inventario.js"></script>
+<script src="<?php echo asset('assets/js/modulos/inventario.js'); ?>"></script>
 
 </body>
 

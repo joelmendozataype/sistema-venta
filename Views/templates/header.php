@@ -20,9 +20,9 @@
   <link rel="stylesheet" href="<?php echo BASE_URL; ?>assets/css/style.css">
   <link rel="stylesheet" href="<?php echo BASE_URL; ?>assets/css/components.css">
   <!-- Custom style CSS -->
-  <link rel="stylesheet" href="<?php echo BASE_URL; ?>assets/css/custom.css">
+  <link rel="stylesheet" href="<?php echo asset('assets/css/custom.css'); ?>">
   <link href="<?php echo BASE_URL; ?>assets/css/jquery-ui.min.css" rel="stylesheet" />
-  <link rel="stylesheet" href="<?php echo BASE_URL; ?>assets/css/estilos.css">
+  <link rel="stylesheet" href="<?php echo asset('assets/css/estilos.css'); ?>">
   
 </head>
 
@@ -62,98 +62,77 @@
             <a href="<?php echo BASE_URL; ?>administracion/home"> <img alt="image" src="<?php echo BASE_URL; ?>assets/img/logo.png" class="header-logo" /> <span class="logo-name"><?php echo TITLE; ?></span>
             </a>
           </div>
+          <?php
+          // Menú según los permisos del usuario: se usa el mismo mapa que valida las rutas
+          $menu = array(
+            array('Administración', 'settings', array(
+              array('Monedas', 'administracion', 'moneda'),
+              array('Usuarios', 'usuarios', 'index'),
+              array('Configuración', 'administracion', 'index'),
+              array('Auditoría', 'auditoria', 'index'),
+            )),
+            array('Cajas', 'box', array(
+              array('Lista Cajas', 'cajas', 'index'),
+              array('Apertura y Cierre', 'cajas', 'arqueo'),
+              array('Reporte de Cierres', 'cajas', 'reporte'),
+            )),
+            array('Clientes', 'users', 'clientes', 'index'),
+            array('Ladings', 'list', 'landing', 'index'),
+            array('Proveedor', 'home', 'proveedor', 'index'),
+            array('Inventario', 'calendar', 'productos', 'inventario'),
+            array('Mantenimiento', 'list', array(
+              array('Medidas', 'medidas', 'index'),
+              array('Categorias', 'categorias', 'index'),
+              array('Productos', 'productos', 'index'),
+            )),
+            array('Compras', 'truck', array(
+              array('Nueva Compra', 'compras', 'index'),
+              array('Historial Compras', 'compras', 'historial'),
+            )),
+            array('Cotizaciones', 'list', array(
+              array('Nueva Cotización', 'cotizaciones', 'index'),
+              array('Historial Cotizaciónes', 'cotizaciones', 'historial'),
+            )),
+            array('Ventas', 'shopping-cart', array(
+              array('Nueva Venta', 'ventas', 'index'),
+              array('Historial Ventas', 'ventas', 'historial'),
+            )),
+            array('Apartados', 'save', array(
+              array('Apartar Productos', 'apartados', 'index'),
+              array('Historial Apartados', 'apartados', 'historial'),
+            )),
+            array('Creditos', 'credit-card', array(
+              array('Administrar Creditos', 'creditos', 'index'),
+              array('Creditos Finalizados', 'creditos', 'finalizados'),
+              array('Historial Abonos', 'creditos', 'abonos'),
+            )),
+          );
+          ?>
           <ul class="sidebar-menu">
             <li class="menu-header">Main</li>
             <li class="dropdown">
               <a href="<?php echo BASE_URL; ?>administracion/home" class="nav-link"><i data-feather="monitor"></i><span>Tablero</span></a>
             </li>
-            <!-- administracion -->
-            <li class="dropdown">
-              <a href="#" class="menu-toggle nav-link has-dropdown"><i data-feather="settings"></i><span>Administración</span></a>
-              <ul class="dropdown-menu">
-                <li><a class="nav-link" href="<?php echo BASE_URL; ?>administracion/moneda">Monedas</a></li>
-                <li><a class="nav-link" href="<?php echo BASE_URL; ?>usuarios">Usuarios</a></li>
-                <li><a class="nav-link" href="<?php echo BASE_URL; ?>administracion">Configuración</a></li>
-              </ul>
-            </li>
-            <!-- Cajas -->
-            <li class="dropdown">
-              <a href="#" class="menu-toggle nav-link has-dropdown"><i data-feather="box"></i><span>Cajas</span></a>
-              <ul class="dropdown-menu">
-                <li><a class="nav-link" href="<?php echo BASE_URL; ?>cajas">Lista Cajas</a></li>
-                <li><a class="nav-link" href="<?php echo BASE_URL; ?>cajas/arqueo">Apertura y Cierre</a></li>
-              </ul>
-            </li>
-            <!-- Clientes -->
-            <li class="dropdown">
-              <a href="<?php echo BASE_URL; ?>clientes" class="nav-link"><i data-feather="users"></i><span>Clientes</span></a>
-            </li>
-            <!-- Clientes -->
-            <li class="dropdown">
-              <a href="<?php echo BASE_URL; ?>landing" class="nav-link"><i data-feather="list"></i><span>Ladings</span></a>
-            </li>
-            <!-- Proveedor -->
-            <li class="dropdown">
-              <a href="<?php echo BASE_URL; ?>proveedor" class="nav-link"><i data-feather="home"></i><span>Proveedor</span></a>
-            </li>
-            <!-- Ineventario -->
-            <li class="dropdown">
-              <a href="<?php echo BASE_URL; ?>productos/inventario" class="nav-link"><i data-feather="calendar"></i><span>Inventario</span></a>
-            </li>
-            <!-- Productos -->
-            <li class="dropdown">
-              <a href="#" class="menu-toggle nav-link has-dropdown"><i data-feather="list"></i><span>Mantenimiento</span></a>
-              <ul class="dropdown-menu">
-                <li><a class="nav-link" href="<?php echo BASE_URL; ?>medidas">Medidas</a></li>
-                <li><a class="nav-link" href="<?php echo BASE_URL; ?>categorias">Categorias</a></li>
-                <li><a class="nav-link" href="<?php echo BASE_URL; ?>productos">Productos</a></li>
-              </ul>
-            </li>
-            <!-- Compras -->
-            <li class="dropdown">
-              <a href="#" class="menu-toggle nav-link has-dropdown"><i data-feather="truck"></i><span>Compras</span></a>
-              <ul class="dropdown-menu">
-                <li><a class="nav-link" href="<?php echo BASE_URL; ?>compras">Nueva Compra</a></li>
-                <li><a class="nav-link" href="<?php echo BASE_URL; ?>compras/historial">Historial Compras</a></li>
-              </ul>
-            </li>
-            <!-- cotizaciones -->
-            <li class="dropdown">
-              <a href="#" class="menu-toggle nav-link has-dropdown"><i data-feather="list"></i><span>Cotizaciones</span></a>
-              <ul class="dropdown-menu">
-                <li><a class="nav-link" href="<?php echo BASE_URL; ?>cotizaciones">Nueva Cotización</a></li>
-                <li><a class="nav-link" href="<?php echo BASE_URL; ?>cotizaciones/historial">Historial Cotizaciónes</a></li>
-              </ul>
-            </li>
-
-            <!-- Ventas -->
-            <li class="dropdown">
-              <a href="#" class="menu-toggle nav-link has-dropdown"><i data-feather="shopping-cart"></i><span>Ventas</span></a>
-              <ul class="dropdown-menu">
-                <li><a class="nav-link" href="<?php echo BASE_URL; ?>ventas">Nueva Venta</a></li>
-                <li><a class="nav-link" href="<?php echo BASE_URL; ?>ventas/historial">Historial Ventas</a></li>
-              </ul>
-            </li>
-
-            <!-- apartados -->
-            <li class="dropdown">
-              <a href="#" class="menu-toggle nav-link has-dropdown"><i data-feather="save"></i><span>Apartados</span></a>
-              <ul class="dropdown-menu">
-                <li><a class="nav-link" href="<?php echo BASE_URL; ?>apartados">Apartar Productos</a></li>
-                <li><a class="nav-link" href="<?php echo BASE_URL; ?>apartados/historial">Historial Apartados</a></li>
-              </ul>
-            </li>
-
-            <!-- credito -->
-            <li class="dropdown">
-              <a href="#" class="menu-toggle nav-link has-dropdown"><i data-feather="credit-card"></i><span>Creditos</span></a>
-              <ul class="dropdown-menu">
-                <li><a class="nav-link" href="<?php echo BASE_URL; ?>creditos">Administrar Creditos</a></li>
-                <li><a class="nav-link" href="<?php echo BASE_URL; ?>creditos/finalizados">Creditos Finalizados</a></li>
-                <li><a class="nav-link" href="<?php echo BASE_URL; ?>creditos/abonos">Historial Abonos</a></li>
-              </ul>
-            </li>
-
+            <?php foreach ($menu as $item) {
+              if (is_array($item[2])) {
+                $opciones = array_filter($item[2], function ($op) {
+                  return Auth::puedeRuta($op[1], $op[2]);
+                });
+                if (empty($opciones)) continue; ?>
+                <li class="dropdown">
+                  <a href="#" class="menu-toggle nav-link has-dropdown"><i data-feather="<?php echo $item[1]; ?>"></i><span><?php echo $item[0]; ?></span></a>
+                  <ul class="dropdown-menu">
+                    <?php foreach ($opciones as $op) { ?>
+                      <li><a class="nav-link" href="<?php echo BASE_URL . $op[1] . ($op[2] == 'index' ? '' : '/' . $op[2]); ?>"><?php echo $op[0]; ?></a></li>
+                    <?php } ?>
+                  </ul>
+                </li>
+              <?php } else if (Auth::puedeRuta($item[2], $item[3])) { ?>
+                <li class="dropdown">
+                  <a href="<?php echo BASE_URL . $item[2] . ($item[3] == 'index' ? '' : '/' . $item[3]); ?>" class="nav-link"><i data-feather="<?php echo $item[1]; ?>"></i><span><?php echo $item[0]; ?></span></a>
+                </li>
+            <?php }
+            } ?>
           </ul>
         </aside>
       </div>

@@ -1,10 +1,11 @@
 <?php
 class Home extends Controller
 {
-    public function __construct() {
-        session_start();
-        if (!empty($_SESSION['activo'])) {
-            header("location: ".BASE_URL. "admin/home");
+    public function __construct()
+    {
+        if (Auth::logueado()) {
+            header("location: " . BASE_URL . "administracion/home");
+            exit;
         }
         parent::__construct();
     }

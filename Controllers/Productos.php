@@ -2,10 +2,6 @@
 
 class Productos extends Controller{
     public function __construct() {
-        session_start();
-        if (empty($_SESSION['activo'])) {
-            header("location: " . BASE_URL);
-        }
         parent::__construct();
     }
     public function index()
@@ -64,30 +60,30 @@ class Productos extends Controller{
             || empty($categoria) || empty($medida)) {
                 $msg = array('msg' => 'Todo los campos con * son obligatorios', 'icono' => 'warning');
             }else{
-                if (strlen($codigo) < 8) {
-                    $msg = array('msg' => 'el código debe contener un mínimo 8 caracteres', 'icono' => 'warning');
+                if (mb_strlen($codigo) < 3) {
+                    $msg = array('msg' => 'el código debe contener un mínimo 3 caracteres', 'icono' => 'warning');
                 } else {
-                    if (strlen($nombre) < 5) {
-                        $msg = array('msg' => 'El nombre debe contener un mínimo 5 caracteres', 'icono' => 'warning');
+                    if (mb_strlen($nombre) < 3) {
+                        $msg = array('msg' => 'El nombre debe contener un mínimo 3 caracteres', 'icono' => 'warning');
                     } else {
-                        if (strlen($precio_compra) < 1) {
-                            $msg = array('msg' => 'El precio compra debe contener un minímo 1 caracter', 'icono' => 'warning');
+                        if (!is_numeric($precio_compra) || $precio_compra < 0) {
+                            $msg = array('msg' => 'El precio de compra debe ser un número válido', 'icono' => 'warning');
                         } else {
-                            if (strlen($precio_venta) < 1) {
-                                $msg = array('msg' => 'La precio venta debe contener un minímo 1 caracter', 'icono' => 'warning');
+                            if (!is_numeric($precio_venta) || $precio_venta <= 0) {
+                                $msg = array('msg' => 'El precio de venta debe ser un número mayor a 0', 'icono' => 'warning');
                             } else {
                                 if (!empty($name)) {
-                                    $extension = pathinfo($name, PATHINFO_EXTENSION);
                                     $formatos_permitidos =  array('png', 'jpeg', 'jpg');
-                                    $extension = pathinfo($name, PATHINFO_EXTENSION);
+                                    $extension = strtolower(pathinfo($name, PATHINFO_EXTENSION));
                                     if (!in_array($extension, $formatos_permitidos)) {
-                                        $msg = array('msg' => 'Archivo no permitido', 'icono' => 'warning');
-                                    } else {
-                                        $imgNombre = $fecha . ".jpg";
-                                        $destino = "assets/img/pro/" . $imgNombre;
+                                        // antes el producto se guardaba igual con la imagen inválida
+                                        echo json_encode(array('msg' => 'Archivo no permitido, solo png o jpg', 'icono' => 'warning'), JSON_UNESCAPED_UNICODE);
+                                        die();
                                     }
+                                    $imgNombre = $fecha . ".jpg";
+                                    $destino = "assets/img/pro/" . $imgNombre;
                                 }else if(!empty($_POST['foto_actual']) && empty($name)){
-                                    $imgNombre = $_POST['foto_actual'];
+                                    $imgNombre = basename($_POST['foto_actual']);
                                 }else{
                                     $imgNombre = "default.png";
                                 }
@@ -105,15 +101,15 @@ class Productos extends Controller{
                                         }
                                 }else{
                                     $imgDelete = $this->model->editarPro($id);
-                                    if ($imgDelete['foto'] != 'default.png') {
-                                        if (file_exists("assets/img/pro/" . $imgDelete['foto'])) {
-                                            unlink("assets/img/pro/" . $imgDelete['foto']);
-                                        }
-                                    }
                                     $data = $this->model->modificarProducto($codigo, $nombre, $precio_compra, $precio_venta, $medida, $categoria, $imgNombre, $id);
                                     if ($data == "modificado") {
+                                        // la foto anterior solo se borra si se subió una nueva
+                                        // (antes se borraba siempre y el producto quedaba sin imagen)
                                         if (!empty($name)) {
                                             move_uploaded_file($tmpname, $destino);
+                                            if (!empty($imgDelete['foto']) && $imgDelete['foto'] != 'default.png' && $imgDelete['foto'] != $imgNombre && file_exists("assets/img/pro/" . $imgDelete['foto'])) {
+                                                unlink("assets/img/pro/" . $imgDelete['foto']);
+                                            }
                                         }
                                         $msg = array('msg' => 'Producto modificado', 'icono' => 'success');
                                     } else if ($data == "existe") {
@@ -182,37 +178,48 @@ class Productos extends Controller{
     public function registrarInventario()
     {
         $id_user = $_SESSION['id_usuario'];
-        $perm = $this->model->verificarPermisos($id_user, "inventario");
-        if (!$perm && $id_user != 1) {
-            header('Location: Administracion/permisos');
+        $agregar = str_replace(',', '.', trim($_POST['agregar'] ?? ''));
+        $id = intval($_POST['id'] ?? 0);
+        $fecha = date('Y-m-d');
+        $motivo = motivoAuditoria();
+        $actual = $id > 0 ? $this->model->editarPro($id) : array();
+        if (empty($id) || $agregar === '') {
+            $msg = array('msg' => 'Todo los campos con * son obligatorios', 'icono' => 'warning');
+        } else if (!is_numeric($agregar) || $agregar == 0) {
+            $msg = array('msg' => 'Ingresa una cantidad válida distinta de 0 (negativa para descontar)', 'icono' => 'warning');
+        } else if ($motivo === null) {
+            $msg = MSG_MOTIVO;
+        } else if (empty($actual)) {
+            $msg = array('msg' => 'El producto no existe', 'icono' => 'error');
+        } else if ($actual['cantidad'] + $agregar < 0) {
+            $msg = array('msg' => 'No puedes descontar más del stock actual (' . $actual['cantidad'] . ')', 'icono' => 'warning');
         } else {
-            $agregar = strClean($_POST['agregar']);
-            $id = strClean($_POST['id']);
-            $fecha = date('Y-m-d');
-            if (empty($id) || empty($agregar)) {
-                $msg = array('msg' => 'Todo los campos con * son obligatorios', 'icono' => 'warning');
-            } else {
-                if (is_numeric($agregar)) {
-                    if ($agregar > 0) {
-                        $data = $this->model->ingresarEntrada($id, $id_user, $agregar, $fecha);
-                    } else {
-                        $data = $this->model->ingresarSalida($id, $id_user, abs($agregar), $fecha);
-                    }
-                    if ($data == 1) {
-                        $cantidad = $this->model->editarPro($id);
-                        $cant_total = $cantidad['cantidad'] + $agregar;
-                        $this->model->actualizarStock($cant_total, $id);
-                        $msg = array('msg' => 'Cantidad del producto Ajustado', 'icono' => 'success');
-                    } else {
-                        $msg = array('msg' => 'Error al ajustar', 'icono' => 'error');
-                    }
-                } else {
-                    $msg = array('msg' => 'Error ingresa un número valido', 'icono' => 'error');
+            // movimiento de inventario, stock y auditoría: todo o nada
+            try {
+                $this->model->iniciarTransaccion();
+                if (!$this->model->moverStock($id, $agregar)) {
+                    throw new Exception('No puedes descontar más del stock actual');
                 }
+                if ($agregar > 0) {
+                    $this->model->ingresarEntrada($id, $id_user, $agregar, $fecha);
+                } else {
+                    $this->model->ingresarSalida($id, $id_user, abs($agregar), $fecha);
+                }
+                $this->model->registrarAuditoria('ajuste_inventario', $id, $motivo, array(
+                    'producto' => $actual['codigo'] . ' - ' . $actual['descripcion'],
+                    'stock_anterior' => $actual['cantidad'],
+                    'ajuste' => ($agregar > 0 ? '+' : '') . $agregar,
+                    'stock_nuevo' => number_format($actual['cantidad'] + $agregar, 2, '.', ''),
+                ));
+                $this->model->confirmar();
+                $msg = array('msg' => 'Cantidad del producto Ajustado', 'icono' => 'success');
+            } catch (Throwable $e) {
+                $this->model->revertir();
+                $msg = array('msg' => ($e instanceof PDOException) ? 'Error al ajustar' : $e->getMessage(), 'icono' => 'error');
             }
-            echo json_encode($msg, JSON_UNESCAPED_UNICODE);
-            die();
         }
+        echo json_encode($msg, JSON_UNESCAPED_UNICODE);
+        die();
     }
     public function listarInventario()
     {
@@ -287,7 +294,7 @@ class Productos extends Controller{
     public function pdfCompra($accion)
     {
         $id_user = $_SESSION['id_usuario'];
-        $perm = $this->model->verificarPermisos($id_user, "Reporte_pdf_compras");
+        $perm = $this->model->verificarPermisos($id_user, "reporte_pdf_compras");
         if (!empty($perm) || $id_user == 1) {
             $empresa = $this->model->getEmpresa();
             if ($accion == 'all') {
@@ -350,7 +357,7 @@ class Productos extends Controller{
     public function pdfVenta($accion)
     {
         $id_user = $_SESSION['id_usuario'];
-        $perm = $this->model->verificarPermisos($id_user, "Reporte_pdf_ventas");
+        $perm = $this->model->verificarPermisos($id_user, "reporte_pdf_ventas");
         if (!empty($perm) || $id_user == 1) {
             $empresa = $this->model->getEmpresa();
             if ($accion == 'all') {

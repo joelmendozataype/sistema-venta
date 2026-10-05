@@ -52,6 +52,7 @@ document.addEventListener("DOMContentLoaded", function() {
         },
         select: function(event, ui) {
             agregarCompra(ui.item.id);
+            return false;
         },
     });
     t_h_c = $("#t_historial_c").DataTable({
@@ -71,7 +72,7 @@ document.addEventListener("DOMContentLoaded", function() {
             { data: "eliminar" },
         ],
         language: {
-            url: "//cdn.datatables.net/plug-ins/1.10.11/i18n/Spanish.json",
+            url: base_url + "assets/js/datatables-es.json",
         },
         dom,
         buttons,
@@ -98,7 +99,7 @@ function cargarDetalle() {
                 html += `<tr>
                <td>${row.descripcion}</td>
                <td width="120"><input type="number" class="form-control" value="${row.cantidad}" step="0.01" min="0.01" onchange="cantidadCompra(${row.id}, event)" /> </td>
-               <td>${row.precio}</td>
+               <td width="140"><input type="number" class="form-control" value="${row.precio.replace(/,/g, '')}" step="0.01" min="0" onchange="precioCompra(${row.id}, event)" /></td>
                <td>${row.sub_total}</td>
                <td>
                <button class="btn btn-outline-danger" type="button" onclick="deleteDetalle(${row.id}, 1)">
@@ -195,6 +196,26 @@ function cantidadCompra(id, e) {
     };
 }
 
+// cambia el precio de compra de un producto del carrito
+function precioCompra(id, e) {
+    const url = base_url + "compras/precioCompra";
+    let data = new FormData();
+    data.append("id", id);
+    data.append("precio", e.target.value);
+    const http = new XMLHttpRequest();
+    http.open("POST", url, true);
+    http.send(data);
+    http.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+            const res = JSON.parse(this.responseText);
+            if (res.icono != "success") {
+                alertas(res.msg, res.icono);
+            }
+            cargarDetalle();
+        }
+    };
+}
+
 function procesarCompra() {
     Swal.fire({
         title: "Esta seguro de Procesar?",
@@ -223,6 +244,8 @@ function procesarCompra() {
                         alertas(res.msg, res.icono);
                         if (res.icono == "success") {
                             formu.reset();
+                            // reset() no limpia el proveedor oculto de la compra anterior
+                            document.getElementById("id_pr").value = "";
                             setTimeout(() => {
                                 cargarDetalle();
                                 generarReportes(1, res.id);

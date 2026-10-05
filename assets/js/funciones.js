@@ -31,7 +31,7 @@ document.addEventListener("DOMContentLoaded", function() {
         processing: true,
         serverSide: false,
         language: {
-            url: "//cdn.datatables.net/plug-ins/1.10.11/i18n/Spanish.json",
+            url: base_url + "assets/js/datatables-es.json",
         },
         dom,
         buttons,
@@ -169,9 +169,10 @@ function salir() {
 }
 
 function pagarCon(e) {
-    const total = document.getElementById("alert_total").textContent;
-    let c_total = parseFloat(total.replace(",", "")) - parseFloat(e.target.value);
-    document.getElementById("cambio").value = c_total.toFixed(2);
+    const total = parseFloat(document.getElementById("alert_total").textContent.replace(/,/g, "")) || 0;
+    const pagado = parseFloat(e.target.value);
+    // vuelto = lo que entrega el cliente - total; vacío si aún no alcanza
+    document.getElementById("cambio").value = (isNaN(pagado) || pagado < total) ? "" : (pagado - total).toFixed(2);
 }
 
 function anularProceso(e) {

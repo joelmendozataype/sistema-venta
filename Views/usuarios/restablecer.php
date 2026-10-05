@@ -64,15 +64,15 @@
     <!-- JS Libraies -->
     <!-- Page Specific JS File -->
     <!-- Template JS File -->
-    <script src="<?php echo BASE_URL; ?>assets/js/scripts.js"></script>
+    <script src="<?php echo asset('assets/js/scripts.js'); ?>"></script>
     <!-- Custom JS File -->
-    <script src="<?php echo BASE_URL; ?>assets/js/custom.js"></script>
+    <script src="<?php echo asset('assets/js/custom.js'); ?>"></script>
 
     <script src="<?php echo BASE_URL; ?>assets/js/sweetalert2.all.min.js"></script>
     <script>
         const base_url = '<?php echo BASE_URL; ?>';
     </script>
-    <script src="<?php echo BASE_URL; ?>assets/js/login.js"></script>
+    <script src="<?php echo asset('assets/js/login.js'); ?>"></script>
 </body>
 
 </html>

@@ -9,10 +9,6 @@ class Administracion extends Controller
     private $id_usuario;
     public function __construct()
     {
-        session_start();
-        if (empty($_SESSION['activo'])) {
-            header("location: " . BASE_URL);
-        }
         $this->id_usuario = $_SESSION['id_usuario'];
         parent::__construct();
     }
@@ -53,7 +49,8 @@ class Administracion extends Controller
     public function modificar()
     {
         if ($this->is_valid_email($_POST['correo'])) {
-            $ruc = intval(strClean($_POST['ruc']));
+            // el RUC se guarda como texto (intval perdía los ceros a la izquierda)
+            $ruc = preg_replace('/\D/', '', strClean($_POST['ruc']));
             $nombre = strClean($_POST['nombre']);
             $tel = strClean($_POST['telefono']);
             $dir = strClean($_POST['direccion']);
@@ -66,8 +63,14 @@ class Administracion extends Controller
             $id = intval(strClean($_POST['id']));
             $img = $_FILES['imagen'];
             $tmpName = $img['tmp_name'];
-            if (empty($id) || empty($nombre) || empty($tel) || empty($correo) || empty($dir) || empty($moneda) || empty($impuesto) || empty($cant_factura)) {
+            $logoInvalido = !empty($img['name']) && strtolower(pathinfo($img['name'], PATHINFO_EXTENSION)) != 'png';
+            if (empty($id) || empty($nombre) || empty($tel) || empty($correo) || empty($dir) || empty($moneda) || !is_numeric($impuesto) || empty($cant_factura)) {
                 $msg = array('msg' => 'Todo los campos son requeridos', 'icono' => 'warning');
+            } else if ($logoInvalido) {
+                // se valida antes de guardar para no dejar los datos a medias
+                $msg = array('msg' => 'El logo debe ser una imagen PNG', 'icono' => 'warning');
+            } else if ($impuesto < 0 || $impuesto > 100) {
+                $msg = array('msg' => 'El impuesto debe estar entre 0 y 100', 'icono' => 'warning');
             } else {
                 $name = "logo.png";
                 $destino = 'assets/img/logo.png';
@@ -244,11 +247,18 @@ class Administracion extends Controller
     }
     public function eliminarMoneda(int $id)
     {
+        $empresa = $this->model->getEmpresa();
+        if (!empty($empresa) && $empresa['moneda'] == $id) {
+            // la configuración usa esta moneda: darla de baja rompe ventas, compras y reportes
+            $msg = array('msg' => 'No puedes dar de baja la moneda que usa la empresa, cámbiala primero en Configuración', 'icono' => 'warning');
+            echo json_encode($msg, JSON_UNESCAPED_UNICODE);
+            die();
+        }
         $data = $this->model->accionMoneda(0, $id);
         if ($data == 1) {
             $msg = array('msg' => 'Moneda dado de baja', 'icono' => 'success');
         } else {
-            $msg = array('msg' => 'Error al eliminar el cliente', 'icono' => 'error');
+            $msg = array('msg' => 'Error al eliminar la moneda', 'icono' => 'error');
         }
         echo json_encode($msg, JSON_UNESCAPED_UNICODE);
         die();

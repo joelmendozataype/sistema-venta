@@ -23,8 +23,12 @@ document.addEventListener("DOMContentLoaded", function() {
         },
         select: function(event, ui) {
             agregarVenta(ui.item.id);
+            // evita que el buscador quede con el código del producto
+            return false;
         },
     });
+    // el formulario de cliente nuevo inicia oculto (solo al cargar la página)
+    desactivarCampos();
     cargarDetalleVenta();
 })
 
@@ -54,7 +58,6 @@ function cargarDetalleVenta() {
             document.getElementById("alert_total").textContent = res.total_pagar;
         }
     };
-    desactivarCampos();
 }
 
 function agregarVenta(id_producto) {
@@ -185,6 +188,9 @@ function procesarVenta() {
                         alertas(res.msg, res.icono);
                         if (res.icono == "success") {
                             formu.reset();
+                            // reset() no limpia los campos ocultos: se quita el cliente de la venta anterior
+                            document.getElementById("id").value = "";
+                            document.getElementById("cambio").value = "";
                             setTimeout(() => {
                                 cargarDetalleVenta();
                                 generarReportes(2, res.id);

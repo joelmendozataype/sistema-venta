@@ -7,17 +7,8 @@ class Cotizaciones extends Controller
     private $id_usuario;
     public function __construct()
     {
-        session_start();
-        if (empty($_SESSION['activo'])) {
-            header("location: " . BASE_URL);
-        }
         parent::__construct();
         $this->id_usuario = $_SESSION['id_usuario'];
-        $perm = $this->model->verificarPermisos($this->id_usuario, "cotizaciones");
-        if (empty($perm) && $this->id_usuario != 1) {
-            header('Location: ' . BASE_URL . 'administracion/permisos');
-            exit;
-        }
     }
     public function index()
     {
@@ -27,8 +18,12 @@ class Cotizaciones extends Controller
 
     public function agregarCotizacion($id_producto)
     {
-        $id = strClean($id_producto);
+        $id = intval($id_producto);
         $datos = $this->model->getProductos($id);
+        if (empty($datos) || $datos['estado'] != 1) {
+            echo json_encode(array('msg' => 'El producto no existe o está inactivo', 'icono' => 'warning'), JSON_UNESCAPED_UNICODE);
+            die();
+        }
         $precio = $datos['precio_venta'];
         $cantidad = 1;
         $comprobar = $this->model->consultarDetalle($id, $this->id_usuario);
@@ -41,7 +36,8 @@ class Cotizaciones extends Controller
             }
         } else {
             $total_cantidad = $comprobar['cantidad'] + 1;
-            $data = $this->model->actualizarDetalle('detalle_temp', $precio, $total_cantidad, $id_producto, $this->id_usuario);
+            // antes se pasaba 'detalle_temp' como primer argumento y el precio quedaba inválido
+            $data = $this->model->actualizarDetalle($comprobar['precio'], $total_cantidad, $id, $this->id_usuario);
             if ($data == "modificado") {
                 $msg = array('msg' => 'Producto actualizado', 'icono' => 'success');
             } else {
@@ -55,11 +51,26 @@ class Cotizaciones extends Controller
     public function itemCotizacion()
     {
         if (isset($_POST['id']) && isset($_POST['item'])) {
-            $id = strClean($_POST['id']);
-            $campo = strClean($_POST['campo']);
+            $id = intval($_POST['id']);
+            $campo = strClean($_POST['campo'] ?? '');
             $item = strClean($_POST['item']);
-            $data = $this->model->actualizarCantidad($campo, $item, $id);
-            if ($data == 'ok') {
+            $temp = $this->model->detalle($id, 'temp_cotizaciones');
+            // solo columnas editables; el nombre de la columna no puede venir libre desde el navegador
+            $numericos = array('cantidad' => 1, 'precio' => 0, 'descuento' => 0, 'impuesto' => 0);
+            if (empty($temp) || $temp['id_usuario'] != $this->id_usuario) {
+                $data = 'ajeno';
+            } else if ($campo == 'medida') {
+                $data = (mb_strlen($item) > 0 && mb_strlen($item) <= 50) ? $this->model->actualizarCantidad('medida', $item, $id) : 'invalido';
+            } else if (isset($numericos[$campo]) && is_numeric($item) && $item >= $numericos[$campo]) {
+                $data = $this->model->actualizarCantidad($campo, $item, $id);
+            } else {
+                $data = 'invalido';
+            }
+            if ($data == 'ajeno') {
+                $msg = array('msg' => 'El producto no está en tu cotización', 'icono' => 'warning');
+            } else if ($data == 'invalido') {
+                $msg = array('msg' => 'Valor no válido', 'icono' => 'warning');
+            } else if ($data == 'ok') {
                 $msg = array('msg' => 'ok', 'icono' => 'success');
             } else {
                 $msg = array('msg' => 'error al agregar', 'icono' => 'warning');
@@ -70,7 +81,12 @@ class Cotizaciones extends Controller
     }
     public function deleteCotizacion($id)
     {
-        $data = $this->model->deleteDetalle('temp_cotizaciones', $id);
+        $temp = $this->model->detalle(intval($id), 'temp_cotizaciones');
+        if (empty($temp) || $temp['id_usuario'] != $this->id_usuario) {
+            echo json_encode(array('msg' => 'El producto no está en tu cotización', 'icono' => 'warning'));
+            die();
+        }
+        $data = $this->model->deleteDetalle('temp_cotizaciones', intval($id));
         if ($data == 'ok') {
             $msg = array('msg' => 'Producto eliminado', 'icono' => 'success');
         } else {
@@ -81,14 +97,19 @@ class Cotizaciones extends Controller
     }
     public function registrarCotizacion()
     {
+        $msg = array('msg' => 'Solicitud no válida', 'icono' => 'error');
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $id_cliente = (!empty($_POST['id_cliente'])) ? strClean($_POST['id_cliente']) : 1;
-            $comentario = strClean($_POST['comentario']);
-            $validez = strClean($_POST['validez']);
+            $id_cliente = (!empty($_POST['id_cliente'])) ? intval($_POST['id_cliente']) : 1;
+            $comentario = strClean($_POST['comentario'] ?? '');
+            $validez = strClean($_POST['validez'] ?? '');
             $fecha = date('Y-m-d');
             $hora = date('H:i:s');
             $detalle = $this->calcularTotal();
             $comprobar = $this->model->consultarCotizacion($this->id_usuario);
+            if (empty($comprobar)) {
+                echo json_encode(array('msg' => 'No hay productos en la cotización', 'icono' => 'warning'));
+                die();
+            }
             $array = array();
             foreach ($comprobar as $producto) {
                 $json['id'] = $producto['id_producto'];

@@ -7,14 +7,14 @@ class ComprasModel extends Query
     }
     public function buscarProducto(string $cod)
     {
-        $sql = "SELECT p.* FROM productos p WHERE p.codigo LIKE '%" . $cod . "%' AND p.estado = 1 OR p.descripcion LIKE '%" . $cod . "%' AND p.estado = 1";
-        $data = $this->selectAll($sql);
+        $sql = "SELECT p.* FROM productos p WHERE p.estado = 1 AND (p.codigo LIKE ? OR p.descripcion LIKE ?) LIMIT 20";
+        $data = $this->selectAll($sql, ["%$cod%", "%$cod%"]);
         return $data;
     }
     public function getProducto(int $id)
     {
-        $sql = "SELECT * FROM productos WHERE id = $id";
-        $data = $this->select($sql);
+        $sql = "SELECT * FROM productos WHERE id = ?";
+        $data = $this->select($sql, [$id]);
         return $data;
     }
     public function registrarDetalle(string $table, int $id_producto, int $id_usuario, string $precio, $cantidad)
@@ -31,8 +31,8 @@ class ComprasModel extends Query
     }
     public function getDetalle(string $table, int $id)
     {
-        $sql = "SELECT d.*, p.descripcion FROM $table d INNER JOIN productos p ON d.id_producto = p.id WHERE d.id_usuario = $id";
-        $data = $this->selectAll($sql);
+        $sql = "SELECT d.*, p.descripcion FROM $table d INNER JOIN productos p ON d.id_producto = p.id WHERE d.id_usuario = ?";
+        $data = $this->selectAll($sql, [$id]);
         return $data;
     }
     public function deleteDetalle(string $table, int $id)
@@ -49,8 +49,8 @@ class ComprasModel extends Query
     }
     public function consultarDetalle(string $table, int $id_producto, int $id_usuario)
     {
-        $sql = "SELECT * FROM $table WHERE id_producto = $id_producto AND id_usuario = $id_usuario";
-        $data = $this->select($sql);
+        $sql = "SELECT * FROM $table WHERE id_producto = ? AND id_usuario = ?";
+        $data = $this->select($sql, [$id_producto, $id_usuario]);
         return $data;
     }
     public function actualizarDetalle(string $table, string $precio, $cantidad, int $id_producto, int $id_usuario)
@@ -109,20 +109,24 @@ class ComprasModel extends Query
     }
     public function getProCompra(int $id_compra)
     {
-        $sql = "SELECT c.*, d.*, p.descripcion FROM compras c INNER JOIN detalle_compras d ON c.id = d.id_compra INNER JOIN productos p ON p.id = d.id_producto WHERE c.id = $id_compra";
-        $data = $this->selectAll($sql);
+        $sql = "SELECT c.*, d.*, p.descripcion FROM compras c INNER JOIN detalle_compras d ON c.id = d.id_compra INNER JOIN productos p ON p.id = d.id_producto WHERE c.id = ?";
+        $data = $this->selectAll($sql, [$id_compra]);
         return $data;
     }
     public function getFecha(string $table, int $id)
     {
-        $sql = "SELECT * FROM $table WHERE id = $id";
-        $data = $this->select($sql);
+        $sql = "SELECT * FROM $table WHERE id = ?";
+        $data = $this->select($sql, [$id]);
         return $data;
     }
     public function getHistorialcompras(int $estado)
     {
-        $sql = "SELECT c.id, c.total, c.fecha, c.hora, p.nombre FROM compras c INNER JOIN proveedor p ON c.id_proveedor = p.id WHERE c.estado = $estado";
-        $data = $this->selectAll($sql);
+        // en las anuladas se incluye quién anuló y el motivo (registro de auditoría)
+        $sql = "SELECT c.id, c.total, c.fecha, c.hora, p.nombre,
+                (SELECT CONCAT(u.nombre, ' · ', DATE_FORMAT(a.fecha, '%Y-%m-%d %H:%i')) FROM auditoria a INNER JOIN usuarios u ON u.id = a.id_usuario WHERE a.accion = 'anular_compra' AND a.id_registro = c.id ORDER BY a.id DESC LIMIT 1) AS anulado_por,
+                (SELECT a.motivo FROM auditoria a WHERE a.accion = 'anular_compra' AND a.id_registro = c.id ORDER BY a.id DESC LIMIT 1) AS motivo_anulacion
+                FROM compras c INNER JOIN proveedor p ON c.id_proveedor = p.id WHERE c.estado = ?";
+        $data = $this->selectAll($sql, [$estado]);
         return $data;
     }
     public function actualizarStock($cantidad, int $id_pro)
@@ -134,14 +138,14 @@ class ComprasModel extends Query
     }
     public function proveedor(int $id)
     {
-        $sql = "SELECT p.* FROM compras c INNER JOIN proveedor p ON p.id = c.id_proveedor WHERE c.id = $id";
-        $data = $this->select($sql);
+        $sql = "SELECT p.* FROM compras c INNER JOIN proveedor p ON p.id = c.id_proveedor WHERE c.id = ?";
+        $data = $this->select($sql, [$id]);
         return $data;
     }
     public function getDetalleTemp(int $id)
     {
-        $sql = "SELECT * FROM detalle_temp WHERE id = $id";
-        $data = $this->select($sql);
+        $sql = "SELECT * FROM detalle_temp WHERE id = ?";
+        $data = $this->select($sql, [$id]);
         return $data;
     }
     public function anular(string $table, int $id)
@@ -158,9 +162,15 @@ class ComprasModel extends Query
     }
     public function getAnularCompras(int $id)
     {
-        $sql = "SELECT * FROM detalle_compras WHERE id_compra = $id";
-        $data = $this->selectAll($sql);
+        $sql = "SELECT * FROM detalle_compras WHERE id_compra = ?";
+        $data = $this->selectAll($sql, [$id]);
         return $data;
+    }
+    // Salida de inventario al anular una compra
+    public function ingresarSalida(int $id, int $id_user, $cantidad, string $fecha)
+    {
+        $sql = "INSERT INTO inventario(id_producto, id_usuario, salidas, fecha) VALUES (?,?,?,?)";
+        return $this->save($sql, array($id, $id_user, $cantidad, $fecha));
     }
     public function ingresarEntrada(int $id, int $id_user, $cantidad, string $fecha)
     {
@@ -171,14 +181,18 @@ class ComprasModel extends Query
     }
     public function verificarPermisos($id_user, $permiso)
     {
-        $sql = "SELECT p.permiso, d.* FROM permisos p INNER JOIN detalle_permisos d ON p.id = d.id_permiso WHERE d.id_usuario = $id_user AND p.permiso = '$permiso'";
-        $existe = $this->select($sql);
+        $sql = "SELECT p.permiso, d.* FROM permisos p INNER JOIN detalle_permisos d ON p.id = d.id_permiso WHERE d.id_usuario = ? AND p.permiso = ?";
+        $existe = $this->select($sql, [$id_user, $permiso]);
         return $existe;
+    }
+    public function actualizarPrecio($precio, int $id)
+    {
+        return $this->save("UPDATE detalle SET precio = ? WHERE id = ?", array($precio, $id));
     }
     public function detalle(int $id, string $table)
     {
-        $sql = "SELECT * FROM $table WHERE id = $id";
-        $data = $this->select($sql);
+        $sql = "SELECT * FROM $table WHERE id = ?";
+        $data = $this->select($sql, [$id]);
         return $data;
     }
     //agregarCantidad

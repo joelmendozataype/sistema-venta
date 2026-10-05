@@ -126,7 +126,7 @@
 
 <?php include "Views/templates/footer.php"; ?>
 
-<script src="<?php echo BASE_URL; ?>assets/js/modulos/ventas.js"></script>
+<script src="<?php echo asset('assets/js/modulos/ventas.js'); ?>"></script>
 
 </body>
 

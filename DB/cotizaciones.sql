@@ -23,9 +23,10 @@ USE `cotizaciones`;
 CREATE TABLE IF NOT EXISTS `abonos` (
   `id` int NOT NULL AUTO_INCREMENT,
   `abono` decimal(10,2) NOT NULL,
-  `fecha` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `fecha` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `id_credito` int NOT NULL,
   `id_usuario` int NOT NULL,
+  `apertura` int NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -34,7 +35,7 @@ CREATE TABLE IF NOT EXISTS `abonos` (
 -- Volcando estructura para tabla cotizaciones.apartados
 CREATE TABLE IF NOT EXISTS `apartados` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `fecha_apartado` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `fecha_apartado` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `fecha_retiro` datetime NOT NULL,
   `abono` decimal(10,2) NOT NULL,
   `total` decimal(10,2) NOT NULL,
@@ -45,6 +46,26 @@ CREATE TABLE IF NOT EXISTS `apartados` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Volcando datos para la tabla cotizaciones.apartados: ~0 rows (aproximadamente)
+
+-- Volcando estructura para tabla cotizaciones.auditoria
+-- Registro de acciones sensibles (solo lectura desde el sistema).
+-- id_registro es una referencia lógica: la tabla depende de `accion` (anular_venta -> ventas, etc.).
+-- ON DELETE RESTRICT: no se puede borrar un usuario que tenga acciones registradas.
+CREATE TABLE IF NOT EXISTS `auditoria` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `fecha` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `id_usuario` int NOT NULL,
+  `accion` varchar(40) NOT NULL,
+  `id_registro` int DEFAULT NULL,
+  `motivo` varchar(255) DEFAULT NULL,
+  `detalle` text,
+  `ip` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `id_usuario` (`id_usuario`),
+  KEY `accion_registro` (`accion`,`id_registro`),
+  KEY `fecha` (`fecha`),
+  CONSTRAINT `auditoria_ibfk_1` FOREIGN KEY (`id_usuario`) REFERENCES `usuarios` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Volcando estructura para tabla cotizaciones.caja
 CREATE TABLE IF NOT EXISTS `caja` (
@@ -83,6 +104,8 @@ CREATE TABLE IF NOT EXISTS `cierre_caja` (
   `fecha_cierre` date DEFAULT NULL,
   `monto_final` decimal(10,2) NOT NULL DEFAULT '0.00',
   `total_ventas` int NOT NULL DEFAULT '0',
+  `ventas_credito` decimal(10,2) NOT NULL DEFAULT '0.00',
+  `total_abonos` decimal(10,2) NOT NULL DEFAULT '0.00',
   `monto_total` decimal(10,2) NOT NULL DEFAULT '0.00',
   `estado` int NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
@@ -173,7 +196,7 @@ CREATE TABLE IF NOT EXISTS `cotizaciones` (
 CREATE TABLE IF NOT EXISTS `creditos` (
   `id` int NOT NULL AUTO_INCREMENT,
   `monto` decimal(10,2) NOT NULL,
-  `fecha` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `fecha` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `estado` int NOT NULL DEFAULT '1',
   `id_venta` int NOT NULL,
   PRIMARY KEY (`id`)
@@ -334,12 +357,25 @@ CREATE TABLE IF NOT EXISTS `moneda` (
 INSERT INTO `moneda` (`id`, `simbolo`, `nombre`, `fecha`, `estado`) VALUES
 	(1, 'S/', 'NUEVO SOLES', '2022-05-28 16:18:27', 1);
 
+-- Volcando estructura para tabla cotizaciones.pagos_apartados
+CREATE TABLE IF NOT EXISTS `pagos_apartados` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `id_apartado` int NOT NULL,
+  `monto` decimal(10,2) NOT NULL,
+  `id_usuario` int NOT NULL,
+  `fecha` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `apertura` int NOT NULL DEFAULT '1',
+  PRIMARY KEY (`id`),
+  KEY `id_apartado` (`id_apartado`),
+  KEY `id_usuario` (`id_usuario`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 -- Volcando estructura para tabla cotizaciones.permisos
 CREATE TABLE IF NOT EXISTS `permisos` (
   `id` int NOT NULL AUTO_INCREMENT,
   `permiso` varchar(30) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=48 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=55 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Volcando datos para la tabla cotizaciones.permisos: ~45 rows (aproximadamente)
 INSERT INTO `permisos` (`id`, `permiso`) VALUES
@@ -388,7 +424,14 @@ INSERT INTO `permisos` (`id`, `permiso`) VALUES
 	(43, 'abrir_caja'),
 	(44, 'cerrar_caja'),
 	(46, 'landing'),
-	(47, 'cotizaciones');
+	(47, 'cotizaciones'),
+	(48, 'restaurar_moneda'),
+	(49, 'asignar_permisos'),
+	(50, 'apartados'),
+	(51, 'reporte_apartados'),
+	(52, 'creditos'),
+	(53, 'registrar_abono'),
+	(54, 'reporte_cajas');
 
 -- Volcando estructura para tabla cotizaciones.productos
 CREATE TABLE IF NOT EXISTS `productos` (
@@ -484,7 +527,7 @@ CREATE TABLE IF NOT EXISTS `usuarios` (
   `telefono` varchar(20) DEFAULT NULL,
   `direccion` varchar(100) DEFAULT NULL,
   `perfil` varchar(50) NOT NULL DEFAULT 'avatar.svg',
-  `clave` varchar(100) NOT NULL,
+  `clave` varchar(255) NOT NULL,
   `id_caja` int NOT NULL,
   `token` varchar(50) DEFAULT NULL,
   `fecha` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

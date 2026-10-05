@@ -73,7 +73,7 @@ function frmLogin(e) {
 
 function recuperarClave(e) {
     e.preventDefault();
-    const correo = document.getElementById('correo');
+    const correo = document.getElementById('correo_reset');
     if (correo.value == '') {
         Swal.fire({
             icon: 'warning',

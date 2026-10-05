@@ -7,10 +7,6 @@ class Compras extends Controller
     private $id_usuario;
     public function __construct()
     {
-        session_start();
-        if (empty($_SESSION['activo'])) {
-            header("location: " . BASE_URL);
-        }
         parent::__construct();
         $this->id_usuario = $_SESSION['id_usuario'];
     }
@@ -28,27 +24,38 @@ class Compras extends Controller
     }
     public function buscarProducto()
     {
-        $data = $this->model->buscarProducto($_GET['pro']);
+        $data = $this->model->buscarProducto(trim($_GET['pro'] ?? ''));
         $datos = array();
         foreach ($data as $row) {
-            $data['id'] = $row['id'];
-            $data['label'] = $row['codigo'] . ' - ' . $row['descripcion'];
-            $data['value'] = $row['codigo'];
-            $data['descripcion'] = $row['descripcion'];
-            $data['cantidad'] = $row['cantidad'];
-            array_push($datos, $data);
+            $datos[] = array(
+                'id' => $row['id'],
+                'label' => $row['codigo'] . ' - ' . $row['descripcion'] . ' (stock: ' . $row['cantidad'] . ')',
+                'value' => $row['codigo'],
+                'descripcion' => $row['descripcion'],
+                'cantidad' => $row['cantidad'],
+                'precio_venta' => $row['precio_venta'],
+                'precio_compra' => $row['precio_compra'],
+            );
         }
         echo json_encode($datos, JSON_UNESCAPED_UNICODE);
         die();
     }
     public function agregarCompra($id_producto)
     {
-        $id = strClean($id_producto);
+        $id = intval($id_producto);
         $datos = $this->model->getProducto($id);
+        if (empty($datos) || $datos['estado'] != 1) {
+            echo json_encode(array('msg' => 'El producto no existe o está inactivo', 'icono' => 'warning'), JSON_UNESCAPED_UNICODE);
+            die();
+        }
         $id_usuario = $_SESSION['id_usuario'];
         $precio = $datos['precio_compra'];
         $cantidad = 1;
         $comprobar = $this->model->consultarDetalle('detalle', $id, $id_usuario);
+        if (!empty($comprobar)) {
+            // conserva el precio que el usuario ya ajustó en el carrito
+            $precio = $comprobar['precio'];
+        }
         if (empty($comprobar)) {
             $data = $this->model->registrarDetalle('detalle', $id, $id_usuario, $precio, $cantidad);
             if ($data == "ok") {
@@ -72,20 +79,48 @@ class Compras extends Controller
     public function cantidadCompra()
     {
         if (isset($_POST['id']) && isset($_POST['cantidad'])) {
-            $id = strClean($_POST['id']);
+            $id = intval($_POST['id']);
             $cantidad = strClean($_POST['cantidad']);
-            $data = $this->model->actualizarCantidad('detalle', $cantidad, $id);
-            if ($data == 'ok') {
-                $msg = array('msg' => 'ok', 'icono' => 'success');
+            if (!$this->esDetallePropio($id)) {
+                $msg = array('msg' => 'El producto no está en tu compra', 'icono' => 'warning');
+            } else if (!is_numeric($cantidad) || $cantidad <= 0) {
+                $msg = array('msg' => 'La cantidad debe ser mayor a 0', 'icono' => 'warning');
             } else {
-                $msg = array('msg' => 'error al agregar', 'icono' => 'warning');
+                $data = $this->model->actualizarCantidad('detalle', $cantidad, $id);
+                if ($data == 'ok') {
+                    $msg = array('msg' => 'ok', 'icono' => 'success');
+                } else {
+                    $msg = array('msg' => 'error al agregar', 'icono' => 'warning');
+                }
             }
             echo json_encode($msg, JSON_UNESCAPED_UNICODE);
         }
         die();
     }
+    // Precio de compra de un producto del carrito (el costo varía en cada compra)
+    public function precioCompra()
+    {
+        $id = intval($_POST['id'] ?? 0);
+        $precio = str_replace(',', '.', trim($_POST['precio'] ?? ''));
+        if (!$this->esDetallePropio($id)) {
+            $msg = array('msg' => 'El producto no está en tu compra', 'icono' => 'warning');
+        } else if (!is_numeric($precio) || $precio < 0) {
+            $msg = array('msg' => 'Ingresa un precio válido', 'icono' => 'warning');
+        } else {
+            $data = $this->model->actualizarPrecio(round((float) $precio, 2), $id);
+            $msg = ($data == 1) ? array('msg' => 'ok', 'icono' => 'success') : array('msg' => 'Error al cambiar el precio', 'icono' => 'error');
+        }
+        echo json_encode($msg, JSON_UNESCAPED_UNICODE);
+        die();
+    }
+    private function esDetallePropio(int $id)
+    {
+        $temp = $this->model->detalle($id, 'detalle');
+        return !empty($temp) && $temp['id_usuario'] == $this->id_usuario;
+    }
     public function listar($table)
     {
+        $table = $this->tablaDetalle($table);
         $id_usuario = $_SESSION['id_usuario'];
         $data['detalle'] = $this->model->getDetalle($table, $id_usuario);
         $total = 0.00;
@@ -101,7 +136,11 @@ class Compras extends Controller
     }
     public function delete($id)
     {
-        $data = $this->model->deleteDetalle('detalle', $id);
+        if (!$this->esDetallePropio(intval($id))) {
+            echo json_encode(array('msg' => 'El producto no está en tu compra', 'icono' => 'warning'));
+            die();
+        }
+        $data = $this->model->deleteDetalle('detalle', intval($id));
         if ($data == 'ok') {
             $msg = array('msg' => 'Producto eliminado', 'icono' => 'success');
         } else {
@@ -113,30 +152,37 @@ class Compras extends Controller
     public function registrarCompra()
     {
         if (isset($_POST['id_pr'])) {
-            $id_pr = (!empty($_POST['id_pr'])) ? strClean($_POST['id_pr']) : 1;
+            $id_pr = (!empty($_POST['id_pr'])) ? intval($_POST['id_pr']) : 1;
             $fecha = date('Y-m-d');
             $hora = date('H:i:s');
             $id_usuario = $_SESSION['id_usuario'];
             $serie = 1;
             $detalle = $this->calcularTotal();
-            $data = $this->model->registraCompra($id_usuario, $id_pr, $detalle['total'], $fecha, $hora, $serie);
-            if ($data > 0) {
-                foreach ($detalle['detalle'] as $row) {
-                    $cantidad = $row['cantidad'];
-                    $precio = $row['precio'];
-                    $id_pro = $row['id_producto'];
-                    $this->model->registrarDetalleCompra($data, $id_pro, $cantidad, $precio);
-                    $stock_actual = $this->model->getProducto($id_pro);
-                    $stock = $stock_actual['cantidad'] + $cantidad;
-                    $this->model->actualizarStock($stock, $id_pro);
-                    $this->model->ingresarEntrada($id_pro, $id_usuario, $cantidad, $fecha);
-                }
-                $vaciar = $this->model->vaciarDetalle('detalle', $id_usuario);
-                if ($vaciar == 'ok') {
-                    $msg = array('msg' => 'Compra generada', 'id' => $data, 'icono' => 'success');
-                }
+            if (empty($detalle['detalle'])) {
+                $msg = array('msg' => 'No hay productos en la compra', 'icono' => 'warning');
             } else {
-                $msg = array('msg' => 'Error al realizar la compra', 'icono' => 'error');
+                // compra, detalle, stock e inventario: todo o nada
+                try {
+                    $this->model->iniciarTransaccion();
+                    // el modelo recibe (proveedor, usuario, ...): antes se enviaban intercambiados
+                    $data = $this->model->registraCompra($id_pr, $id_usuario, $detalle['total'], $fecha, $hora, $serie);
+                    if (!($data > 0)) {
+                        throw new Exception('Error al realizar la compra');
+                    }
+                    foreach ($detalle['detalle'] as $row) {
+                        $cantidad = $row['cantidad'];
+                        $id_pro = $row['id_producto'];
+                        $this->model->registrarDetalleCompra($data, $id_pro, $cantidad, $row['precio']);
+                        $this->model->moverStock($id_pro, $cantidad);
+                        $this->model->ingresarEntrada($id_pro, $id_usuario, $cantidad, $fecha);
+                    }
+                    $this->model->vaciarDetalle('detalle', $id_usuario);
+                    $this->model->confirmar();
+                    $msg = array('msg' => 'Compra generada', 'id' => $data, 'icono' => 'success');
+                } catch (Throwable $e) {
+                    $this->model->revertir();
+                    $msg = array('msg' => 'Error al realizar la compra', 'icono' => 'error');
+                }
             }
         }
         echo json_encode($msg);
@@ -146,8 +192,7 @@ class Compras extends Controller
     {
         if (is_numeric($id_compra)) {
             
-            $perm = $this->model->verificarPermisos($this->id_usuario, "reporte_compras");
-            if (!empty($perm) || $this->id_usuario == 1) {
+            if (Auth::puede(array("reporte_compras", "nueva_compra"))) {
                 $empresa = $this->model->getEmpresa();
                 $productos = $this->model->getProCompra($id_compra);
                 if (empty($productos)) {
@@ -232,8 +277,7 @@ class Compras extends Controller
     {
         if (is_numeric($id_compra)) {
             
-            $perm = $this->model->verificarPermisos($this->id_usuario, "reporte_compras");
-            if (!empty($perm) || $this->id_usuario == 1) {
+            if (Auth::puede(array("reporte_compras", "nueva_compra"))) {
                 $empresa = $this->model->getEmpresa();
                 $productos = $this->model->getProCompra($id_compra);
                 if (empty($productos)) {
@@ -350,18 +394,52 @@ class Compras extends Controller
     public function anularC($id)
     {
         if (isset($_GET)) {
+            $id = intval($id);
+            $compra = $this->model->detalle($id, 'compras');
             $existe = $this->model->getAnularCompras($id);
-            if (!empty($existe)) {
-                foreach ($existe as $row) {
-                    $stock = $this->model->getProducto($row['id_producto']);
-                    $cantidad = $stock['cantidad'] - $row['cantidad'];
-                    $this->model->actualizarStock($cantidad, $row['id_producto']);
+            $sinStock = array();
+            foreach ($existe as $row) {
+                $stock = $this->model->getProducto($row['id_producto']);
+                if ($stock['cantidad'] < $row['cantidad']) {
+                    $sinStock[] = $stock['descripcion'] . ' (stock: ' . $stock['cantidad'] . ')';
                 }
-                $data = $this->model->anular('compras',  $id);
-                if ($data == 'ok') {
+            }
+            $motivo = motivoAuditoria();
+            if ($motivo === null) {
+                $msg = MSG_MOTIVO;
+            } else if (empty($compra) || $compra['estado'] != 1) {
+                // evita descontar el stock dos veces
+                $msg = array('msg' => 'La compra no existe o ya fue anulada', 'icono' => 'warning');
+            } else if (!empty($sinStock)) {
+                // esos productos ya se vendieron: anular dejaría el stock en negativo
+                $msg = array('msg' => 'No se puede anular, ya se vendió parte de: ' . implode(', ', $sinStock), 'icono' => 'warning');
+            } else if (!empty($existe)) {
+                try {
+                    $this->model->iniciarTransaccion();
+                    $fecha = date('Y-m-d');
+                    foreach ($existe as $row) {
+                        // descuento atómico: si entre tanto se vendió, se revierte todo
+                        if (!$this->model->moverStock($row['id_producto'], -$row['cantidad'])) {
+                            throw new Exception('Stock insuficiente para anular la compra');
+                        }
+                        $this->model->ingresarSalida($row['id_producto'], $this->id_usuario, $row['cantidad'], $fecha);
+                    }
+                    if ($this->model->anular('compras', $id) != 'ok') {
+                        throw new Exception('Error al anular la compra');
+                    }
+                    $proveedor = $this->model->proveedor($id);
+                    $this->model->registrarAuditoria('anular_compra', $id, $motivo, array(
+                        'compra' => $id,
+                        'fecha_compra' => $compra['fecha'] . ' ' . $compra['hora'],
+                        'proveedor' => empty($proveedor) ? '' : $proveedor['nombre'],
+                        'total' => $compra['total'],
+                        'productos' => count($existe),
+                    ));
+                    $this->model->confirmar();
                     $msg = array('msg' => 'Compra anulada', 'icono' => 'success');
-                } else {
-                    $msg = array('msg' => 'Error al anular la compra', 'icono' => 'error');
+                } catch (Throwable $e) {
+                    $this->model->revertir();
+                    $msg = array('msg' => ($e instanceof PDOException) ? 'Error al anular la compra' : $e->getMessage(), 'icono' => 'warning');
                 }
             } else {
                 $msg = array('msg' => 'Error al anular la compra', 'icono' => 'error');
@@ -372,6 +450,7 @@ class Compras extends Controller
     }
     public function anularProceso($table)
     {
+        $table = $this->tablaDetalle($table);
         $vaciar = $this->model->vaciarDetalle($table, $_SESSION['id_usuario']);
         if ($vaciar == 'ok') {
             $msg = array('msg' => 'Proceso Anulado', 'icono' => 'success');
@@ -385,6 +464,15 @@ class Compras extends Controller
     {
         $data['compras'] = $this->model->getHistorialCompras(0);
         $this->views->getView('compras',   "inactivos", $data);
+    }
+    // Solo se permiten las tablas temporales de compras (detalle) y ventas (detalle_temp)
+    private function tablaDetalle($table)
+    {
+        if (!in_array($table, array('detalle', 'detalle_temp'), true)) {
+            echo json_encode(array('msg' => 'Solicitud no válida', 'icono' => 'error'), JSON_UNESCAPED_UNICODE);
+            die();
+        }
+        return $table;
     }
     function generate_numbers($start, $count, $digits)
     {

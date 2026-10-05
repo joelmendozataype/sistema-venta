@@ -7,14 +7,14 @@ class CategoriasModel extends Query
     }
     public function getCategorias(int $estado)
     {
-        $sql = "SELECT * FROM categorias WHERE estado = $estado";
-        $data = $this->selectAll($sql);
+        $sql = "SELECT * FROM categorias WHERE estado = ?";
+        $data = $this->selectAll($sql, [$estado]);
         return $data;
     }
     public function registrarCategoria(string $nombre)
     {
-        $verficar = "SELECT * FROM categorias WHERE nombre = '$nombre'";
-        $existe = $this->select($verficar);
+        $verficar = "SELECT * FROM categorias WHERE nombre = ?";
+        $existe = $this->select($verficar, [$nombre]);
         if (empty($existe)) {
             # code...
             $sql = "INSERT INTO categorias(nombre) VALUES (?)";
@@ -32,8 +32,8 @@ class CategoriasModel extends Query
     }
     public function modificarCategoria(string $nombre, int $id)
     {
-        $verficar = "SELECT * FROM categorias WHERE nombre = '$nombre' AND id != $id";
-        $existe = $this->select($verficar);
+        $verficar = "SELECT * FROM categorias WHERE nombre = ? AND id != ?";
+        $existe = $this->select($verficar, [$nombre, $id]);
         if (empty($existe)) {
             $sql = "UPDATE categorias SET nombre = ? WHERE id = ?";
             $datos = array($nombre, $id);
@@ -50,8 +50,8 @@ class CategoriasModel extends Query
     }
     public function editarCat(int $id)
     {
-        $sql = "SELECT * FROM categorias WHERE id = $id";
-        $data = $this->select($sql);
+        $sql = "SELECT * FROM categorias WHERE id = ?";
+        $data = $this->select($sql, [$id]);
         return $data;
     }
     public function accionCat(int $estado, int $id)
@@ -63,8 +63,8 @@ class CategoriasModel extends Query
     }
     public function verificarPermisos($id_user, $permiso)
     {
-        $sql = "SELECT p.id, p.permiso, d.* FROM permisos p INNER JOIN detalle_permisos d ON p.id = d.id_permiso WHERE d.id_usuario = $id_user AND p.permiso = '$permiso'";
-        $existe = $this->select($sql);
+        $sql = "SELECT p.id, p.permiso, d.* FROM permisos p INNER JOIN detalle_permisos d ON p.id = d.id_permiso WHERE d.id_usuario = ? AND p.permiso = ?";
+        $existe = $this->select($sql, [$id_user, $permiso]);
         return $existe;
     }
 }

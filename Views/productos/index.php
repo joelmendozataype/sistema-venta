@@ -2,7 +2,7 @@
 <?php if ($data['existe']) { ?>
     <button class="btn btn-outline-primary mb-2" type="button" onclick="frmProducto();"><i class="fas fa-plus"></i></button>
 <?php } ?>
-<a class="btn btn-outline-success mb-2" href="<?php echo BASE_URL; ?>productos/inactivos"><i class="fas fa-trash"></i></a>
+<?php if (Auth::puedeRuta('productos', 'inactivos')) { ?><a class="btn btn-outline-success mb-2" href="<?php echo BASE_URL; ?>productos/inactivos"><i class="fas fa-trash"></i></a><?php } ?>
 <div class="card">
     <div class="card-header">
         Productos
@@ -34,7 +34,7 @@
 </div>
 <?php include "Views/templates/footer.php"; ?>
 
-<script src="<?php echo BASE_URL; ?>assets/js/modulos/producto.js"></script>
+<script src="<?php echo asset('assets/js/modulos/producto.js'); ?>"></script>
 
 </body>
 

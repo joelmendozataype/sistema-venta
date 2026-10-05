@@ -21,7 +21,10 @@ if (!empty($array[2])) {
 require_once 'Config/App/Autoload.php';
 require_once 'Config/Helpers.php';
 $dirControllers = "Controllers/" . $controller . ".php";
-if (file_exists($dirControllers)) {
+if (preg_match('/^[A-Za-z]+$/', $controller) && file_exists($dirControllers)) {
+    // Sesión y control de permisos antes de ejecutar cualquier acción
+    Auth::iniciarSesion();
+    Auth::autorizar($controller, $metodo, $parametro);
     require_once $dirControllers;
     $controller = new $controller();
     if (method_exists($controller, $metodo)) {

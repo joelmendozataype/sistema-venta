@@ -7,8 +7,8 @@ class ApartadosModel extends Query
     }
     public function getProducto(int $id)
     {
-        $sql = "SELECT * FROM productos WHERE id = $id";
-        $data = $this->select($sql);
+        $sql = "SELECT * FROM productos WHERE id = ?";
+        $data = $this->select($sql, [$id]);
         return $data;
     }
     public function getApartados()
@@ -19,8 +19,8 @@ class ApartadosModel extends Query
     }
     public function consultarDetalle(int $id_producto, int $id_usuario)
     {
-        $sql = "SELECT * FROM temp_apartados WHERE id_producto = $id_producto AND id_usuario = $id_usuario";
-        $data = $this->select($sql);
+        $sql = "SELECT * FROM temp_apartados WHERE id_producto = ? AND id_usuario = ?";
+        $data = $this->select($sql, [$id_producto, $id_usuario]);
         return $data;
     }
     public function registrarDetalle(int $id_producto, int $id_usuario, string $precio, int $cantidad)
@@ -37,8 +37,8 @@ class ApartadosModel extends Query
     }
     public function getDetalle(int $id_usuario)
     {
-        $sql = "SELECT d.*, p.descripcion FROM temp_apartados d INNER JOIN productos p ON d.id_producto = p.id WHERE d.id_usuario = $id_usuario";
-        $data = $this->selectAll($sql);
+        $sql = "SELECT d.*, p.descripcion FROM temp_apartados d INNER JOIN productos p ON d.id_producto = p.id WHERE d.id_usuario = ?";
+        $data = $this->selectAll($sql, [$id_usuario]);
         return $data;
     }
     public function deleteDetalle(string $table, int $id)
@@ -55,8 +55,8 @@ class ApartadosModel extends Query
     }
     public function detalle(int $id, string $table)
     {
-        $sql = "SELECT * FROM $table WHERE id = $id";
-        $data = $this->select($sql);
+        $sql = "SELECT * FROM $table WHERE id = ?";
+        $data = $this->select($sql, [$id]);
         return $data;
     }
     //agregarCantidad
@@ -75,8 +75,8 @@ class ApartadosModel extends Query
     
     public function actualizarDetalle(string $table, string $precio, int $cantidad, string $sub_total,int $id_producto, int $id_usuario)
     {
-        $sql = "UPDATE $table SET precio = ?, cantidad = ?, sub_total = ? WHERE id_producto = ? AND id_usuario = ?";
-        $datos = array($precio,$cantidad, $sub_total, $id_producto, $id_usuario);
+        $sql = "UPDATE $table SET precio = ?, cantidad = ? WHERE id_producto = ? AND id_usuario = ?";
+        $datos = array($precio, $cantidad, $id_producto, $id_usuario);
         $data = $this->save($sql, $datos);
         if ($data == 1) {
             $res = "modificado";
@@ -115,7 +115,7 @@ class ApartadosModel extends Query
         }
         return $res;
     }
-    public function actualizarStock(int $cantidad, int $id_pro)
+    public function actualizarStock($cantidad, int $id_pro)
     {
         $sql = "UPDATE productos SET cantidad = ? WHERE id = ?";
         $datos = array($cantidad, $id_pro);
@@ -134,10 +134,20 @@ class ApartadosModel extends Query
         }
         return $res;
     }
-    //actualizar Apartado
+    // Cobro de un apartado (anticipo o saldo): suma al arqueo de caja del usuario
+    public function registrarPago(int $id_apartado, $monto, int $id_usuario)
+    {
+        $sql = "INSERT INTO pagos_apartados (id_apartado, monto, id_usuario) VALUES (?,?,?)";
+        return $this->insertar($sql, array($id_apartado, $monto, $id_usuario));
+    }
+    public function verificarCaja(int $id_usuario)
+    {
+        return $this->select("SELECT id FROM cierre_caja WHERE id_usuario = ? AND estado = 1", [$id_usuario]);
+    }
+    //actualizar Apartado: entregado y pagado por completo
     public function actualizarApartado(int $id_apartado)
     {
-        $sql = "UPDATE apartados SET color=?, estado = ? WHERE id = ?";
+        $sql = "UPDATE apartados SET color=?, estado = ?, abono = total WHERE id = ? AND estado = 1";
         $datos = array('#198754', 0, $id_apartado);
         $data = $this->save($sql, $datos);
         if ($data == 1) {
@@ -147,28 +157,34 @@ class ApartadosModel extends Query
         }
         return $res;
     }
+    // estado 2 = anulado (gris en el calendario)
+    public function anularApartado(int $id_apartado)
+    {
+        $sql = "UPDATE apartados SET color = ?, estado = ? WHERE id = ? AND estado = 1";
+        return $this->ejecutar($sql, array('#6c757d', 2, $id_apartado));
+    }
     public function getDetalleApartado(int $id_apartado)
     {
-        $sql = "SELECT d.*, a.*, p.descripcion FROM detalle_apartados d INNER JOIN apartados a ON a.id = d.id_apartado INNER JOIN productos p ON p.id = d.id_producto WHERE a.id = $id_apartado";
-        $data = $this->selectAll($sql);
+        $sql = "SELECT d.*, a.*, p.descripcion FROM detalle_apartados d INNER JOIN apartados a ON a.id = d.id_apartado INNER JOIN productos p ON p.id = d.id_producto WHERE a.id = ?";
+        $data = $this->selectAll($sql, [$id_apartado]);
         return $data;
     }
     public function getVerificar(int $id_apartado)
     {
-        $sql = "SELECT * FROM apartados WHERE id = $id_apartado";
-        $data = $this->select($sql);
+        $sql = "SELECT * FROM apartados WHERE id = ?";
+        $data = $this->select($sql, [$id_apartado]);
         return $data;
     }
     public function getCliente(int $id)
     {
-        $sql = "SELECT c.*, a.* FROM apartados a INNER JOIN clientes c ON a.id_cliente = c.id WHERE a.id = $id";
-        $data = $this->select($sql);
+        $sql = "SELECT c.*, a.* FROM apartados a INNER JOIN clientes c ON a.id_cliente = c.id WHERE a.id = ?";
+        $data = $this->select($sql, [$id]);
         return $data;
     }
     public function verificarPermisos($id_user, $permiso)
     {
-        $sql = "SELECT p.permiso, d.* FROM permisos p INNER JOIN detalle_permisos d ON p.id = d.id_permiso WHERE d.id_usuario = $id_user AND p.permiso = '$permiso'";
-        $existe = $this->select($sql);
+        $sql = "SELECT p.permiso, d.* FROM permisos p INNER JOIN detalle_permisos d ON p.id = d.id_permiso WHERE d.id_usuario = ? AND p.permiso = ?";
+        $existe = $this->select($sql, [$id_user, $permiso]);
         return $existe;
     }
 }

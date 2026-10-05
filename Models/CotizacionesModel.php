@@ -14,8 +14,8 @@ class CotizacionesModel extends Query
 
     public function getProductos(int $id)
     {
-        $sql = "SELECT * FROM productos WHERE id = $id";
-        $data = $this->select($sql);
+        $sql = "SELECT * FROM productos WHERE id = ?";
+        $data = $this->select($sql, [$id]);
         return $data;
     }
     public function registrarDetalle($precio, $cantidad, $id_producto, $id_usuario)
@@ -32,8 +32,8 @@ class CotizacionesModel extends Query
     }
     public function getDetalle(int $id)
     {
-        $sql = "SELECT d.*, p.descripcion FROM temp_cotizaciones d INNER JOIN productos p ON d.id_producto = p.id WHERE d.id_usuario = $id";
-        $data = $this->selectAll($sql);
+        $sql = "SELECT d.*, p.descripcion FROM temp_cotizaciones d INNER JOIN productos p ON d.id_producto = p.id WHERE d.id_usuario = ?";
+        $data = $this->selectAll($sql, [$id]);
         return $data;
     }
 
@@ -52,15 +52,15 @@ class CotizacionesModel extends Query
 
     public function consultarDetalle(int $id_producto, int $id_usuario)
     {
-        $sql = "SELECT * FROM temp_cotizaciones WHERE id_producto = $id_producto AND id_usuario = $id_usuario";
-        $data = $this->select($sql);
+        $sql = "SELECT * FROM temp_cotizaciones WHERE id_producto = ? AND id_usuario = ?";
+        $data = $this->select($sql, [$id_producto, $id_usuario]);
         return $data;
     }
 
     public function consultarCotizacion(int $id_usuario)
     {
-        $sql = "SELECT t.*, p.descripcion FROM temp_cotizaciones t INNER JOIN productos p ON t.id_producto = p.id WHERE t.id_usuario = $id_usuario";
-        $data = $this->selectAll($sql);
+        $sql = "SELECT t.*, p.descripcion FROM temp_cotizaciones t INNER JOIN productos p ON t.id_producto = p.id WHERE t.id_usuario = ?";
+        $data = $this->selectAll($sql, [$id_usuario]);
         return $data;
     }
 
@@ -99,8 +99,8 @@ class CotizacionesModel extends Query
 
     public function getCotizacion(int $id)
     {
-        $sql = "SELECT c.*, cl.nombre, cl.telefono, cl.direccion FROM cotizaciones c INNER JOIN clientes cl ON c.id_cliente = cl.id WHERE c.id = $id";
-        $data = $this->select($sql);
+        $sql = "SELECT c.*, cl.nombre, cl.telefono, cl.direccion FROM cotizaciones c INNER JOIN clientes cl ON c.id_cliente = cl.id WHERE c.id = ?";
+        $data = $this->select($sql, [$id]);
         return $data;
     }
 
@@ -126,22 +126,22 @@ class CotizacionesModel extends Query
 
     public function getDetalleTemp(int $id)
     {
-        $sql = "SELECT * FROM temp_cotizaciones WHERE id = $id";
-        $data = $this->select($sql);
+        $sql = "SELECT * FROM temp_cotizaciones WHERE id = ?";
+        $data = $this->select($sql, [$id]);
         return $data;
     }
 
     public function verificarPermisos($id_user, $permiso)
     {
-        $sql = "SELECT p.permiso, d.* FROM permisos p INNER JOIN detalle_permisos d ON p.id = d.id_permiso WHERE d.id_usuario = $id_user AND p.permiso = '$permiso'";
-        $existe = $this->select($sql);
+        $sql = "SELECT p.permiso, d.* FROM permisos p INNER JOIN detalle_permisos d ON p.id = d.id_permiso WHERE d.id_usuario = ? AND p.permiso = ?";
+        $existe = $this->select($sql, [$id_user, $permiso]);
         return $existe;
     }
 
     public function detalle(int $id, string $table)
     {
-        $sql = "SELECT * FROM $table WHERE id = $id";
-        $data = $this->select($sql);
+        $sql = "SELECT * FROM $table WHERE id = ?";
+        $data = $this->select($sql, [$id]);
         return $data;
     }
 
@@ -155,6 +155,9 @@ class CotizacionesModel extends Query
     //agregarCantidad
     public function actualizarCantidad($campo, $item, $id)
     {
+        if (!in_array($campo, array('cantidad', 'precio', 'medida', 'descuento', 'impuesto'), true)) {
+            return 'error';
+        }
         $sql = "UPDATE temp_cotizaciones SET $campo = ? WHERE id = ?";
         $datos = array($item, $id);
         $data = $this->save($sql, $datos);

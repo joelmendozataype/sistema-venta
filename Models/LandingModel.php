@@ -37,8 +37,8 @@ class LandingModel extends Query
     }
     public function editar(int $id)
     {
-        $sql = "SELECT * FROM landing WHERE id = $id";
-        $data = $this->select($sql);
+        $sql = "SELECT * FROM landing WHERE id = ?";
+        $data = $this->select($sql, [$id]);
         return $data;
     }
     public function accion(int $estado, int $id)
@@ -58,10 +58,10 @@ class LandingModel extends Query
 
     public function registrarCliente($dni, string $nombre, string $telefono, string $direccion)
     {
-        $verficarDni = "SELECT * FROM clientes WHERE dni = '$dni'";
-        $verficarTel = "SELECT * FROM clientes WHERE telefono = '$telefono'";
-        $existeDni = $this->select($verficarDni);
-        $existeTel = $this->select($verficarTel);
+        $verficarDni = "SELECT * FROM clientes WHERE dni = ?";
+        $verficarTel = "SELECT * FROM clientes WHERE telefono = ?";
+        $existeDni = $this->select($verficarDni, [$dni]);
+        $existeTel = $this->select($verficarTel, [$telefono]);
         if (!empty($existeDni)) {
             $res = 'dni';
         } else if (!empty($existeTel)) {
@@ -81,8 +81,8 @@ class LandingModel extends Query
 
     public function verificarPermisos($id_user, $permiso)
     {
-        $sql = "SELECT p.id, p.permiso, d.* FROM permisos p INNER JOIN detalle_permisos d ON p.id = d.id_permiso WHERE d.id_usuario = $id_user AND p.permiso = '$permiso'";
-        $existe = $this->select($sql);
+        $sql = "SELECT p.id, p.permiso, d.* FROM permisos p INNER JOIN detalle_permisos d ON p.id = d.id_permiso WHERE d.id_usuario = ? AND p.permiso = ?";
+        $existe = $this->select($sql, [$id_user, $permiso]);
         return $existe;
     }
 }

@@ -19,14 +19,14 @@ class ProductosModel extends Query
     }
     public function getProductos(int $estado)
     {
-        $sql = "SELECT p.*, m.nombre AS medida, c.nombre AS categoria FROM productos p INNER JOIN categorias c ON p.id_categoria = c.id INNER JOIN medidas m ON p.id_medida = m.id WHERE p.estado = $estado";
-        $data = $this->selectAll($sql);
+        $sql = "SELECT p.*, m.nombre AS medida, c.nombre AS categoria FROM productos p INNER JOIN categorias c ON p.id_categoria = c.id INNER JOIN medidas m ON p.id_medida = m.id WHERE p.estado = ?";
+        $data = $this->selectAll($sql, [$estado]);
         return $data;
     }
     public function registrarProducto(string $codigo, string $nombre, string $precio_compra, string $precio_venta, int $medida, int $id_categoria, string $img)
     {
-        $vericar = "SELECT * FROM productos WHERE codigo = '$codigo'";
-        $existe = $this->select($vericar);
+        $vericar = "SELECT * FROM productos WHERE codigo = ?";
+        $existe = $this->select($vericar, [$codigo]);
         if (empty($existe)) {
             $sql = "INSERT INTO productos(codigo, descripcion, precio_compra, precio_venta, id_medida, id_categoria, foto) VALUES (?,?,?,?,?,?,?)";
             $datos = array($codigo, $nombre, $precio_compra, $precio_venta, $medida, $id_categoria, $img);
@@ -43,8 +43,8 @@ class ProductosModel extends Query
     }
     public function modificarProducto(string $codigo, string $nombre, string $precio_compra, string $precio_venta, int $medida, int $id_categoria, string $img, int $id)
     {
-        $verficar = "SELECT * FROM productos WHERE codigo = '$codigo' AND id != $id";
-        $existe = $this->select($verficar);
+        $verficar = "SELECT * FROM productos WHERE codigo = ? AND id != ?";
+        $existe = $this->select($verficar, [$codigo, $id]);
         if (empty($existe)) {
             $sql = "UPDATE productos SET codigo = ?, descripcion = ?, precio_compra = ?, precio_venta = ?, id_medida = ?, id_categoria =?, foto = ? WHERE id = ?";
             $datos = array($codigo, $nombre, $precio_compra, $precio_venta, $medida, $id_categoria, $img, $id);
@@ -61,8 +61,8 @@ class ProductosModel extends Query
     }
     public function editarPro(int $id)
     {
-        $sql = "SELECT * FROM productos WHERE id = $id";
-        $data = $this->select($sql);
+        $sql = "SELECT * FROM productos WHERE id = ?";
+        $data = $this->select($sql, [$id]);
         return $data;
     }
     public function accionPro(int $estado, int $id)
@@ -86,8 +86,8 @@ class ProductosModel extends Query
     }
     public function consultarDetalle(int $id_producto, int $id_usuario)
     {
-        $sql = "SELECT * FROM detalle_temp WHERE id_producto = $id_producto AND id_usuario = $id_usuario";
-        $data = $this->select($sql);
+        $sql = "SELECT * FROM detalle_temp WHERE id_producto = ? AND id_usuario = ?";
+        $data = $this->select($sql, [$id_producto, $id_usuario]);
         return $data;
     }
     public function ingresarInventario(int $id, int $id_user, $cantidad, string $fecha, string $hora, string $accion)
@@ -124,8 +124,8 @@ class ProductosModel extends Query
     }
     public function filtroInventarios(string $desde, string $hasta)
     {
-        $sql = "SELECT p.descripcion, i.id AS id_inventario, i.id_producto, i.fecha, SUM(i.entradas) AS total_entradas, SUM(i.salidas) AS total_salidas FROM inventario i INNER JOIN productos p ON i.id_producto = p.id WHERE i.fecha BETWEEN '$desde' AND '$hasta' GROUP BY p.id, i.fecha ORDER BY i.id DESC";
-        $data = $this->selectAll($sql);
+        $sql = "SELECT p.descripcion, i.id AS id_inventario, i.id_producto, i.fecha, SUM(i.entradas) AS total_entradas, SUM(i.salidas) AS total_salidas FROM inventario i INNER JOIN productos p ON i.id_producto = p.id WHERE i.fecha BETWEEN ? AND ? GROUP BY p.id, i.fecha ORDER BY i.id DESC";
+        $data = $this->selectAll($sql, [$desde, $hasta]);
         return $data;
     }
     public function actualizarStock($cantidad, int $id_pro)
@@ -149,8 +149,8 @@ class ProductosModel extends Query
     }
     public function filtroCompras(string $desde, string $hasta)
     {
-        $sql = "SELECT c.*, u.id AS id_user, u.nombre FROM compras c INNER JOIN usuarios u ON c.id_usuario = u.id WHERE c.fecha BETWEEN '$desde' AND '$hasta' AND c.estado = 1 ORDER BY c.id DESC";
-        $data = $this->selectAll($sql);
+        $sql = "SELECT c.*, u.id AS id_user, u.nombre FROM compras c INNER JOIN usuarios u ON c.id_usuario = u.id WHERE c.fecha BETWEEN ? AND ? AND c.estado = 1 ORDER BY c.id DESC";
+        $data = $this->selectAll($sql, [$desde, $hasta]);
         return $data;
     }
     public function getVentas()
@@ -161,14 +161,14 @@ class ProductosModel extends Query
     }
     public function filtroVentas(string $desde, string $hasta)
     {
-        $sql = "SELECT v.*, u.id AS id_user, u.nombre, c.id AS id_cli, c.nombre AS cliente FROM ventas v INNER JOIN usuarios u ON v.id_usuario = u.id INNER JOIN clientes c ON v.id_cliente = c.id WHERE v.fecha BETWEEN '$desde' AND '$hasta' AND v.estado = 1 ORDER BY v.id DESC";
-        $data = $this->selectAll($sql);
+        $sql = "SELECT v.*, u.id AS id_user, u.nombre, c.id AS id_cli, c.nombre AS cliente FROM ventas v INNER JOIN usuarios u ON v.id_usuario = u.id INNER JOIN clientes c ON v.id_cliente = c.id WHERE v.fecha BETWEEN ? AND ? AND v.estado = 1 ORDER BY v.id DESC";
+        $data = $this->selectAll($sql, [$desde, $hasta]);
         return $data;
     }
     public function verificarPermisos($id_user, $permiso)
     {
-        $sql = "SELECT p.id, p.permiso, d.* FROM permisos p INNER JOIN detalle_permisos d ON p.id = d.id_permiso WHERE d.id_usuario = $id_user AND p.permiso = '$permiso'";
-        $existe = $this->select($sql);
+        $sql = "SELECT p.id, p.permiso, d.* FROM permisos p INNER JOIN detalle_permisos d ON p.id = d.id_permiso WHERE d.id_usuario = ? AND p.permiso = ?";
+        $existe = $this->select($sql, [$id_user, $permiso]);
         return $existe;
     }
 }

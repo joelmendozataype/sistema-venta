@@ -6,10 +6,6 @@ class Apartados extends Controller
 {
     public function __construct()
     {
-        session_start();
-        if (empty($_SESSION['activo'])) {
-            header("location: " . BASE_URL);
-        }
         parent::__construct();
     }
     public function index()
@@ -19,8 +15,12 @@ class Apartados extends Controller
     }
     public function agregar($id_producto)
     {
-        $id = strClean($id_producto);
+        $id = intval($id_producto);
         $datos = $this->model->getProducto($id);
+        if (empty($datos) || $datos['estado'] != 1) {
+            echo json_encode(array('msg' => 'El producto no existe o está inactivo', 'icono' => 'warning'), JSON_UNESCAPED_UNICODE);
+            die();
+        }
         $id_usuario = $_SESSION['id_usuario'];
         $precio = $datos['precio_venta'];
         $cantidad = 1;
@@ -45,7 +45,7 @@ class Apartados extends Controller
             if ($cantidad_dis < $total_cantidad) {
                 $msg = array('msg' => 'No hay Stock, te quedan ' . $stock_disponible, 'icono' => 'warning');
             } else {
-                $data = $this->model->actualizarDetalle('temp_apartados', $precio, $total_cantidad, $sub_total, $id_producto, $id_usuario);
+                $data = $this->model->actualizarDetalle('temp_apartados', $precio, $total_cantidad, $sub_total, $id, $id_usuario);
                 if ($data == "modificado") {
                     $msg = array('msg' => 'Producto actualizado', 'icono' => 'success');
                 } else {
@@ -60,11 +60,18 @@ class Apartados extends Controller
     public function cantidadApartado()
     {
         if (isset($_POST['id']) && isset($_POST['cantidad'])) {
-            $id = strClean($_POST['id']);
+            $id = intval($_POST['id']);
             $cantidad = strClean($_POST['cantidad']);
             $temp = $this->model->detalle($id, 'temp_apartados');
+            if (empty($temp) || $temp['id_usuario'] != $_SESSION['id_usuario']) {
+                echo json_encode(array('msg' => 'El producto no está en tu apartado', 'icono' => 'warning'), JSON_UNESCAPED_UNICODE);
+                die();
+            }
             $producto = $this->model->getProducto($temp['id_producto']);
-            if ($producto['cantidad'] >= $cantidad) {
+            if (!ctype_digit((string) $cantidad) || $cantidad <= 0) {
+                // temp_apartados.cantidad es entera
+                $msg = array('msg' => 'La cantidad debe ser un número entero mayor a 0', 'icono' => 'warning');
+            } else if ($producto['cantidad'] >= $cantidad) {
                 $data = $this->model->actualizarCantidad('temp_apartados', $cantidad, $id);
                 if ($data == 'ok') {
                     $msg = array('msg' => 'ok', 'icono' => 'success');
@@ -80,50 +87,18 @@ class Apartados extends Controller
     }
     public function delete($id)
     {
-        $data = $this->model->deleteDetalle('temp_apartados', $id);
+        $temp = $this->model->detalle(intval($id), 'temp_apartados');
+        if (empty($temp) || $temp['id_usuario'] != $_SESSION['id_usuario']) {
+            echo json_encode(array('msg' => 'El producto no está en tu apartado', 'icono' => 'warning'));
+            die();
+        }
+        $data = $this->model->deleteDetalle('temp_apartados', intval($id));
         if ($data == 'ok') {
             $msg = array('msg' => 'Producto eliminado', 'icono' => 'success');
         } else {
             $msg = array('msg' => 'Error al eliminar', 'icono' => 'success');
         }
         echo json_encode($msg);
-        die();
-    }
-    public function ingresarApartado()
-    {
-        $id = $_POST['id'];
-        $datos = $this->model->getProductos($id);
-        $id_producto = $datos['id'];
-        $id_usuario = $_SESSION['id_usuario'];
-        $precio = $datos['precio_venta'];
-        $cantidad = $_POST['cantidad'];
-        $comprobar = $this->model->consultarDetalle($id_producto, $id_usuario);
-        if (empty($comprobar)) {
-            if ($datos['cantidad'] >= $cantidad) {
-                $data = $this->model->registrarDetalle($id_producto, $id_usuario, $precio, $cantidad);
-                if ($data == "ok") {
-                    $msg = array('msg' => 'Producto Ingresado', 'icono' => 'success');
-                } else {
-                    $msg = array('msg' => 'Error al Ingresar el Producto', 'icono' => 'error');
-                }
-            } else {
-                $msg = array('msg' => 'Stock no disponible: ' . $datos['cantidad'], 'icono' => 'warning');
-            }
-        } else {
-            $total_cantidad = $comprobar['cantidad'] + $cantidad;
-            $sub_total = $total_cantidad * $precio;
-            if ($datos['cantidad'] < $total_cantidad) {
-                $msg = array('msg' => 'Stock no disponible', 'icono' => 'warning');
-            } else {
-                $data = $this->model->actualizarDetalle('detalle_temp', $precio, $total_cantidad, $sub_total, $id_producto, $id_usuario,);
-                if ($data == "modificado") {
-                    $msg = array('msg' => 'Producto actualizado', 'icono' => 'success');
-                } else {
-                    $msg = array('msg' => 'Error al actualizar el producto', 'icono' => 'error');
-                }
-            }
-        }
-        echo json_encode($msg, JSON_UNESCAPED_UNICODE);
         die();
     }
     public function listar()
@@ -143,43 +118,57 @@ class Apartados extends Controller
     }
     public function registrar()
     {
-        $f_retiro = $_POST['start'];
+        $f_retiro = $_POST['start'] ?? '';
         $fecha_actual = date('Y-m-d');
-        if ($f_retiro >= $fecha_actual) {
-            $id_usuario = $_SESSION['id_usuario'];
-            $id_cliente = $_POST['id'];
-            $abono = $_POST['abono'];
-            $hora = $_POST['hora'];
-            $fecha_retiro = $f_retiro . ' ' . $hora;
-            if (empty($id_cliente) || empty($abono) || empty($hora)) {
-                $msg = array('msg' => 'Todo los campos son obligatorios', 'icono' => 'warning');
-            } else {
-                $detalle = $this->model->getDetalle($id_usuario);
-                $total = 0.00;
-                for ($i = 0; $i < count($detalle); $i++) {
-                    $precio = $detalle[$i]['precio'];
-                    $cantidad = $detalle[$i]['cantidad'];
-                    $total = $total + ($precio * $cantidad);
-                }
-                $data = $this->model->registrarApartado($fecha_retiro, $abono, $total, $id_cliente);
-                if ($data > 0) {
-                    foreach ($detalle as $row) {
-                        $this->model->registrarDetalleApartado($row['cantidad'], $row['precio'], $row['id_producto'], $data);
-                        $stock_actual = $this->model->getProducto($row['id_producto']);
-                        $stock = $stock_actual['cantidad'] - $row['cantidad'];
-                        $this->model->actualizarStock($stock, $row['id_producto']);
-                    }
-                    $this->model->vaciarDetalle($id_usuario);
-                    $msg = array('msg' => 'Productos Apartado', 'icono' => 'success', 'id_apartado' => $data);
-                } else {
-                    $msg = array('msg' => 'Error al Apartar los productos', 'icono' => 'error');
-                }
-            }
-        } else {
-            $msg = array('msg' => 'Seleccione una fecha actual', 'icono' => 'warning');
+        $id_usuario = $_SESSION['id_usuario'];
+        $id_cliente = intval($_POST['id'] ?? 0);
+        $abono = str_replace(',', '.', trim($_POST['abono'] ?? ''));
+        $hora = $_POST['hora'] ?? '';
+        $detalle = $this->model->getDetalle($id_usuario);
+        $total = 0.00;
+        foreach ($detalle as $row) {
+            $total += $row['precio'] * $row['cantidad'];
         }
-
-
+        $total = round($total, 2);
+        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $f_retiro) || $f_retiro < $fecha_actual) {
+            $msg = array('msg' => 'Seleccione una fecha de retiro desde hoy en adelante', 'icono' => 'warning');
+        } else if (empty($id_cliente) || !preg_match('/^\d{2}:\d{2}/', $hora)) {
+            $msg = array('msg' => 'Todo los campos son obligatorios', 'icono' => 'warning');
+        } else if (empty($detalle)) {
+            $msg = array('msg' => 'No hay productos para apartar', 'icono' => 'warning');
+        } else if (!is_numeric($abono) || $abono <= 0) {
+            $msg = array('msg' => 'Ingresa un anticipo válido mayor a 0', 'icono' => 'warning');
+        } else if (round((float) $abono, 2) > $total) {
+            $msg = array('msg' => 'El anticipo no puede ser mayor al total (' . number_format($total, 2) . ')', 'icono' => 'warning');
+        } else if (empty($this->model->verificarCaja($id_usuario))) {
+            // el anticipo es dinero que entra a la caja
+            $msg = array('msg' => 'La caja esta cerrada, ábrela para registrar el apartado', 'icono' => 'warning');
+        } else if (($sinStock = $this->sinStock($detalle)) != '') {
+            $msg = array('msg' => 'Stock insuficiente: ' . $sinStock, 'icono' => 'warning');
+        } else {
+            $abono = round((float) $abono, 2);
+            // apartado, detalle, stock reservado y anticipo: todo o nada
+            try {
+                $this->model->iniciarTransaccion();
+                $data = $this->model->registrarApartado($f_retiro . ' ' . $hora, $abono, $total, $id_cliente);
+                if (!($data > 0)) {
+                    throw new Exception('Error al Apartar los productos');
+                }
+                foreach ($detalle as $row) {
+                    if (!$this->model->moverStock($row['id_producto'], -$row['cantidad'])) {
+                        throw new Exception('Stock insuficiente: ' . $row['descripcion']);
+                    }
+                    $this->model->registrarDetalleApartado($row['cantidad'], $row['precio'], $row['id_producto'], $data);
+                }
+                $this->model->registrarPago($data, $abono, $id_usuario);
+                $this->model->vaciarDetalle($id_usuario);
+                $this->model->confirmar();
+                $msg = array('msg' => 'Productos Apartado', 'icono' => 'success', 'id_apartado' => $data);
+            } catch (Throwable $e) {
+                $this->model->revertir();
+                $msg = array('msg' => ($e instanceof PDOException) ? 'Error al Apartar los productos' : $e->getMessage(), 'icono' => 'warning');
+            }
+        }
         echo json_encode($msg, JSON_UNESCAPED_UNICODE);
         die();
     }
@@ -189,9 +178,14 @@ class Apartados extends Controller
         for ($i=0; $i < count($data); $i++) {
             $restante = number_format($data[$i]['total'] - $data[$i]['abono'], 2);
             $data[$i]['restante'] = '<span class="badge badge-danger">'.$restante.'</span>';
+            $data[$i]['entregado'] = ($data[$i]['estado'] == 0);
             if ($data[$i]['estado'] == 1) {
                 $data[$i]['estado'] = '<span class="badge bg-warning">Apartado</span>';
-            }else{
+            } else if ($data[$i]['estado'] == 2) {
+                $data[$i]['title'] = 'ANULADO - ' . $data[$i]['title'];
+                $data[$i]['restante'] = '<span class="badge bg-secondary">0.00</span>';
+                $data[$i]['estado'] = '<span class="badge bg-secondary">Anulado</span>';
+            } else {
                 $data[$i]['estado'] = '<span class="badge badge-success">Entregado</span>';
             }
         }
@@ -200,27 +194,115 @@ class Apartados extends Controller
     }
     public function verficar($id_apartado)
     {
-        $data = $this->model->getVerificar($id_apartado);
+        $data = $this->model->getVerificar(intval($id_apartado));
         echo json_encode($data, JSON_UNESCAPED_UNICODE);
         die();
     }
+    // Entrega: se cobra el saldo pendiente (entra a la caja) y se marca como entregado
     public function entrega($id_apartado)
     {
-        $data = $this->model->actualizarApartado($id_apartado);
-        if ($data == 1) {
-            $mensaje = array('msg' => 'Productos Entregado', 'icono' => 'success');
+        $id_apartado = intval($id_apartado);
+        $apartado = $this->model->getVerificar($id_apartado);
+        $id_usuario = $_SESSION['id_usuario'];
+        if (empty($apartado)) {
+            $mensaje = array('msg' => 'El apartado no existe', 'icono' => 'error');
+        } else if ($apartado['estado'] == 2) {
+            $mensaje = array('msg' => 'Este apartado fue anulado, no se puede entregar', 'icono' => 'warning');
+        } else if ($apartado['estado'] != 1) {
+            $mensaje = array('msg' => 'Este apartado ya fue entregado', 'icono' => 'info');
+        } else if (empty($this->model->verificarCaja($id_usuario))) {
+            $mensaje = array('msg' => 'La caja esta cerrada, ábrela para cobrar el saldo y entregar', 'icono' => 'warning');
         } else {
-            $mensaje = array('msg' => 'Error en la Entrega', 'icono' => 'error');
+            $saldo = round($apartado['total'] - $apartado['abono'], 2);
+            try {
+                $this->model->iniciarTransaccion();
+                if ($this->model->actualizarApartado($id_apartado) != 1) {
+                    throw new Exception('Error en la Entrega');
+                }
+                if ($saldo > 0) {
+                    $this->model->registrarPago($id_apartado, $saldo, $id_usuario);
+                }
+                $this->model->confirmar();
+                $mensaje = array('msg' => 'Productos entregados' . ($saldo > 0 ? ', saldo cobrado: ' . number_format($saldo, 2) : ''), 'icono' => 'success');
+            } catch (Throwable $e) {
+                $this->model->revertir();
+                $mensaje = array('msg' => 'Error en la Entrega', 'icono' => 'error');
+            }
         }
         echo json_encode($mensaje, JSON_UNESCAPED_UNICODE);
         die();
+    }
+    /*
+     * Anular un apartado que el cliente no recogerá: los productos vuelven al stock
+     * y, si se indica, se devuelve el anticipo (sale de la caja como pago negativo).
+     */
+    public function anular($id_apartado)
+    {
+        $id_apartado = intval($id_apartado);
+        $apartado = $this->model->getVerificar($id_apartado);
+        $id_usuario = $_SESSION['id_usuario'];
+        $devolver = !empty($_POST['devolver']) && $_POST['devolver'] !== 'false';
+        $motivo = motivoAuditoria();
+        if ($motivo === null) {
+            $mensaje = MSG_MOTIVO;
+        } else if (empty($apartado)) {
+            $mensaje = array('msg' => 'El apartado no existe', 'icono' => 'error');
+        } else if ($apartado['estado'] != 1) {
+            $mensaje = array('msg' => 'Solo se pueden anular apartados pendientes de entrega', 'icono' => 'warning');
+        } else if ($devolver && $apartado['abono'] > 0 && empty($this->model->verificarCaja($id_usuario))) {
+            $mensaje = array('msg' => 'La caja esta cerrada, ábrela para devolver el anticipo', 'icono' => 'warning');
+        } else {
+            try {
+                $this->model->iniciarTransaccion();
+                foreach ($this->model->getDetalleApartado($id_apartado) as $row) {
+                    $this->model->moverStock($row['id_producto'], $row['cantidad']);
+                }
+                if ($this->model->anularApartado($id_apartado) != 1) {
+                    throw new Exception('Error al anular');
+                }
+                if ($devolver && $apartado['abono'] > 0) {
+                    $this->model->registrarPago($id_apartado, -$apartado['abono'], $id_usuario);
+                }
+                $cliente = $this->model->getCliente($id_apartado);
+                $this->model->registrarAuditoria('anular_apartado', $id_apartado, $motivo, array(
+                    'apartado' => $id_apartado,
+                    'cliente' => empty($cliente) ? '' : $cliente['nombre'],
+                    'fecha_retiro' => $apartado['fecha_retiro'],
+                    'total' => $apartado['total'],
+                    'anticipo' => $apartado['abono'],
+                    'anticipo_devuelto' => ($devolver && $apartado['abono'] > 0),
+                ));
+                $this->model->confirmar();
+                $texto = 'Apartado anulado, los productos volvieron al stock';
+                if ($apartado['abono'] > 0) {
+                    $texto .= $devolver ? '. Anticipo devuelto: ' . number_format($apartado['abono'], 2) : '. El anticipo de ' . number_format($apartado['abono'], 2) . ' no se devolvió';
+                }
+                $mensaje = array('msg' => $texto, 'icono' => 'success');
+            } catch (Throwable $e) {
+                $this->model->revertir();
+                $mensaje = array('msg' => 'Error al anular el apartado', 'icono' => 'error');
+            }
+        }
+        echo json_encode($mensaje, JSON_UNESCAPED_UNICODE);
+        die();
+    }
+    // Productos del carrito que ya no tienen stock suficiente
+    private function sinStock(array $detalle)
+    {
+        $faltantes = array();
+        foreach ($detalle as $row) {
+            $producto = $this->model->getProducto($row['id_producto']);
+            if (empty($producto) || $producto['estado'] != 1 || $producto['cantidad'] < $row['cantidad']) {
+                $faltantes[] = $row['descripcion'] . ' (disponible: ' . (empty($producto) ? 0 : $producto['cantidad']) . ')';
+            }
+        }
+        return implode(', ', $faltantes);
     }
     public function generarPdf($id_apartado)
     {
         if (is_numeric($id_apartado)) {
             $id_user = $_SESSION['id_usuario'];
-            $perm = $this->model->verificarPermisos($id_user, "reporte_apartados");
-            if (!empty($perm) || $id_user == 1) {
+            if (Auth::puede(array("apartados", "reporte_apartados"))) {
                 $empresa = $this->model->getEmpresa();
                 $productos = $this->model->getDetalleApartado($id_apartado);
                 if (empty($productos)) {

@@ -58,10 +58,14 @@
                                             <i class="fas fa-check-circle"></i>
                                         </div>
                                     </div>
-                                    <input id="agregar" class="form-control" type="number" name="agregar" placeholder="Agregar Existencia" required>
+                                    <input id="agregar" class="form-control" type="number" name="agregar" placeholder="Agregar Existencia" step="0.01" required>
                                 </div>
                             </div>
                         </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="motivo">Motivo del ajuste <span class="text-danger">*</span></label>
+                        <textarea id="motivo" name="motivo" class="form-control" rows="2" maxlength="255" placeholder="Ej.: merma por producto vencido, conteo físico del almacén (queda en la auditoría)" required></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
