@@ -111,11 +111,9 @@ CREATE TABLE IF NOT EXISTS `cierre_caja` (
   PRIMARY KEY (`id`),
   KEY `id_usuario` (`id_usuario`),
   CONSTRAINT `cierre_caja_ibfk_1` FOREIGN KEY (`id_usuario`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Volcando datos para la tabla cotizaciones.cierre_caja: ~0 rows (aproximadamente)
-INSERT INTO `cierre_caja` (`id`, `id_usuario`, `monto_inicial`, `fecha_apertura`, `fecha_cierre`, `monto_final`, `total_ventas`, `monto_total`, `estado`) VALUES
-	(1, 1, 500.00, '2022-10-11', NULL, 0.00, 0, 0.00, 1);
 
 -- Volcando estructura para tabla cotizaciones.clientes
 CREATE TABLE IF NOT EXISTS `clientes` (
