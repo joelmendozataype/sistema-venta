@@ -1,0 +1,7 @@
+# Ignorar archivo de configuración local con contraseñas
+Config/Config.php
+
+# Ignorar archivos del sistema / VS Code
+.vscode/
+.DS_Store
+Thumbs.db
