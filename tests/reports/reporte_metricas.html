@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Reporte de Métricas de Cobertura y Efectividad - Sistema Venta</title>
+    <style>
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f8fafc; color: #0f172a; margin: 0; padding: 24px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        h1 { margin-bottom: 4px; color: #1e293b; }
+        .subtitle { color: #64748b; margin-bottom: 24px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; margin-bottom: 24px; }
+        .card { background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); border: 1px solid #e2e8f0; }
+        .card h3 { margin: 0 0 8px 0; font-size: 14px; color: #64748b; text-transform: uppercase; }
+        .metric-value { font-size: 32px; font-weight: 700; color: #0f172a; }
+        .metric-sub { font-size: 13px; color: #475569; margin-top: 6px; }
+        .progress { background: #e2e8f0; height: 8px; border-radius: 4px; margin-top: 10px; overflow: hidden; }
+        .progress-bar { background: #2563eb; height: 100%; }
+        .progress-bar.green { background: #16a34a; }
+        table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+        th, td { padding: 12px 14px; text-align: left; border-bottom: 1px solid #e2e8f0; font-size: 14px; }
+        th { background: #f1f5f9; font-weight: 600; color: #334155; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Métricas de Cobertura y Efectividad en Pruebas Automatizadas</h1>
+    <div class="subtitle">Proyecto: <strong>Sistema Venta (PHP + Selenium WebDriver)</strong> | Rama: <code>featuring/jorge_sistema_ventas</code> | Fecha: 2026-11-02 17:03:53</div>
+
+    <h2>1. Métricas de Cobertura (Coverage)</h2>
+    <div class="grid">
+        <div class="card">
+            <h3>Cobertura Funcional (Módulos)</h3>
+            <div class="metric-value">100%</div>
+            <div class="metric-sub">17 de 17 módulos cubiertos</div>
+            <div class="progress"><div class="progress-bar green" style="width:100%"></div></div>
+        </div>
+        <div class="card">
+            <h3>Cobertura de Rutas ACL</h3>
+            <div class="metric-value">100%</div>
+            <div class="metric-sub">154 de 154 endpoints verificados</div>
+            <div class="progress"><div class="progress-bar" style="width:100%"></div></div>
+        </div>
+        <div class="card">
+            <h3>Cobertura Funciones Núcleo</h3>
+            <div class="metric-value">100%</div>
+            <div class="metric-sub">15 de 15 funciones críticas</div>
+            <div class="progress"><div class="progress-bar green" style="width:100%"></div></div>
+        </div>
+        <div class="card">
+            <h3>Cobertura Selectores Selenium DOM</h3>
+            <div class="metric-value">100%</div>
+            <div class="metric-sub">24 de 24 selectores UI</div>
+            <div class="progress"><div class="progress-bar green" style="width:100%"></div></div>
+        </div>
+    </div>
+
+    <h2>2. Métricas de Efectividad (Effectiveness)</h2>
+    <div class="grid">
+        <div class="card">
+            <h3>Tasa de Éxito (Pass Rate)</h3>
+            <div class="metric-value">100%</div>
+            <div class="metric-sub">19 exitosos / 19 ejecutados</div>
+            <div class="progress"><div class="progress-bar green" style="width:100%"></div></div>
+        </div>
+        <div class="card">
+            <h3>Efectividad Detección Defectos (DDE)</h3>
+            <div class="metric-value">100%</div>
+            <div class="metric-sub">8 de 8 defectos/mutaciones atrapados</div>
+            <div class="progress"><div class="progress-bar green" style="width:100%"></div></div>
+        </div>
+        <div class="card">
+            <h3>Densidad de Aserciones</h3>
+            <div class="metric-value">12.47</div>
+            <div class="metric-sub">237 aserciones totales verificadas</div>
+        </div>
+        <div class="card">
+            <h3>Tiempo Total de Ejecución</h3>
+            <div class="metric-value">479.566 ms</div>
+            <div class="metric-sub">Servidor Selenium activo: No requerido para suite base</div>
+        </div>
+    </div>
+
+    <h2>3. Detalle de Casos de Prueba Ejecutados</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Caso de Prueba</th>
+                <th>Categoría</th>
+                <th>Módulo</th>
+                <th>Estado</th>
+                <th>Aserciones</th>
+                <th>Efectividad DDE</th>
+                <th>Tiempo</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+        <td><code>TC-UNIT-01</code></td>
+        <td>Sanitización de SQL Injection y XSS en strClean()</td>
+        <td>Seguridad / Unidad</td>
+        <td><code>usuarios</code></td>
+        <td><span style="background:#16a34a;color:#fff;padding:2px 8px;border-radius:12px;font-size:12px;">PASSED</span></td>
+        <td style='text-align:center;'>9</td>
+        <td><span style="background:#2563eb;color:#fff;padding:2px 8px;border-radius:12px;font-size:12px;">Defecto Detectado</span></td>
+        <td style='text-align:right;'>2.95 ms</td>
+    </tr><tr>
+        <td><code>TC-UNIT-02</code></td>
+        <td>Validación de fronteras en motivoAuditoria() (mín 10, máx 255 caracteres)</td>
+        <td>Frontera / Unidad</td>
+        <td><code>auditoria</code></td>
+        <td><span style="background:#16a34a;color:#fff;padding:2px 8px;border-radius:12px;font-size:12px;">PASSED</span></td>
+        <td style='text-align:center;'>3</td>
+        <td><span style="background:#2563eb;color:#fff;padding:2px 8px;border-radius:12px;font-size:12px;">Defecto Detectado</span></td>
+        <td style='text-align:right;'>0.503 ms</td>
+    </tr><tr>
+        <td><code>TC-UNIT-03</code></td>
+        <td>Hashing Bcrypt y migración transparente de SHA-256 en claveHash/claveVerificar/claveRehash</td>
+        <td>Criptografía / Unidad</td>
+        <td><code>usuarios</code></td>
+        <td><span style="background:#16a34a;color:#fff;padding:2px 8px;border-radius:12px;font-size:12px;">PASSED</span></td>
+        <td style='text-align:center;'>5</td>
+        <td><span style="background:#2563eb;color:#fff;padding:2px 8px;border-radius:12px;font-size:12px;">Defecto Detectado</span></td>
+        <td style='text-align:right;'>468.21 ms</td>
+    </tr><tr>
+        <td><code>TC-UNIT-04</code></td>
+        <td>Versionado cache-busting de recursos estáticos con asset()</td>
+        <td>Unidad</td>
+        <td><code>home</code></td>
+        <td><span style="background:#16a34a;color:#fff;padding:2px 8px;border-radius:12px;font-size:12px;">PASSED</span></td>
+        <td style='text-align:center;'>2</td>
+        <td><span style="color:#64748b;font-size:12px;">Estándar</span></td>
+        <td style='text-align:right;'>0.784 ms</td>
+    </tr><tr>
+        <td><code>TC-RBAC-01</code></td>
+        <td>Verificación exhaustiva del mapa de rutas ACL (Config/Permisos.php) contra Controladores</td>
+        <td>Integración / RBAC</td>
+        <td><code>administracion</code></td>
+        <td><span style="background:#16a34a;color:#fff;padding:2px 8px;border-radius:12px;font-size:12px;">PASSED</span></td>
+        <td style='text-align:center;'>171</td>
+        <td><span style="background:#2563eb;color:#fff;padding:2px 8px;border-radius:12px;font-size:12px;">Defecto Detectado</span></td>
+        <td style='text-align:right;'>0.448 ms</td>
+    </tr><tr>
+        <td><code>TC-RBAC-02</code></td>
+        <td>Separación estricta de privilegios crear vs modificar en endpoints registrar()</td>
+        <td>Seguridad / RBAC</td>
+        <td><code>productos</code></td>
+        <td><span style="background:#16a34a;color:#fff;padding:2px 8px;border-radius:12px;font-size:12px;">PASSED</span></td>
+        <td style='text-align:center;'>14</td>
+        <td><span style="background:#2563eb;color:#fff;padding:2px 8px;border-radius:12px;font-size:12px;">Defecto Detectado</span></td>
+        <td style='text-align:right;'>0.259 ms</td>
+    </tr><tr>
+        <td><code>TC-SEL-DOM-01</code></td>
+        <td>Sincronización de selectores Selenium LoginPage con plantilla real Views/index.php</td>
+        <td>Selenium POM / DOM</td>
+        <td><code>usuarios</code></td>
+        <td><span style="background:#16a34a;color:#fff;padding:2px 8px;border-radius:12px;font-size:12px;">PASSED</span></td>
+        <td style='text-align:center;'>8</td>
+        <td><span style="background:#2563eb;color:#fff;padding:2px 8px;border-radius:12px;font-size:12px;">Defecto Detectado</span></td>
+        <td style='text-align:right;'>0.828 ms</td>
+    </tr><tr>
+        <td><code>TC-SEL-DOM-02</code></td>
+        <td>Sincronización de selectores Selenium CajaArqueoPage con Views/cajas/arqueo.php y modal apertura</td>
+        <td>Selenium POM / DOM</td>
+        <td><code>cajas</code></td>
+        <td><span style="background:#16a34a;color:#fff;padding:2px 8px;border-radius:12px;font-size:12px;">PASSED</span></td>
+        <td style='text-align:center;'>5</td>
+        <td><span style="background:#2563eb;color:#fff;padding:2px 8px;border-radius:12px;font-size:12px;">Defecto Detectado</span></td>
+        <td style='text-align:right;'>0.924 ms</td>
+    </tr><tr>
+        <td><code>TC-SEL-DOM-03</code></td>
+        <td>Sincronización de selectores Selenium NuevaVentaPage con Views/ventas/index.php y flujos transaccionales</td>
+        <td>Selenium POM / DOM</td>
+        <td><code>ventas</code></td>
+        <td><span style="background:#16a34a;color:#fff;padding:2px 8px;border-radius:12px;font-size:12px;">PASSED</span></td>
+        <td style='text-align:center;'>10</td>
+        <td><span style="background:#2563eb;color:#fff;padding:2px 8px;border-radius:12px;font-size:12px;">Defecto Detectado</span></td>
+        <td style='text-align:right;'>0.486 ms</td>
+    </tr><tr>
+        <td><code>TC-MOD-CLIE</code></td>
+        <td>Verificación de contrato de controlador y modelo para módulo &#039;clientes&#039;</td>
+        <td>Integración / Estructura</td>
+        <td><code>clientes</code></td>
+        <td><span style="background:#16a34a;color:#fff;padding:2px 8px;border-radius:12px;font-size:12px;">PASSED</span></td>
+        <td style='text-align:center;'>1</td>
+        <td><span style="color:#64748b;font-size:12px;">Estándar</span></td>
+        <td style='text-align:right;'>0.337 ms</td>
+    </tr><tr>
+        <td><code>TC-MOD-PROV</code></td>
+        <td>Verificación de contrato de controlador y modelo para módulo &#039;proveedor&#039;</td>
+        <td>Integración / Estructura</td>
+        <td><code>proveedor</code></td>
+        <td><span style="background:#16a34a;color:#fff;padding:2px 8px;border-radius:12px;font-size:12px;">PASSED</span></td>
+        <td style='text-align:center;'>1</td>
+        <td><span style="color:#64748b;font-size:12px;">Estándar</span></td>
+        <td style='text-align:right;'>0.253 ms</td>
+    </tr><tr>
+        <td><code>TC-MOD-MEDI</code></td>
+        <td>Verificación de contrato de controlador y modelo para módulo &#039;medidas&#039;</td>
+        <td>Integración / Estructura</td>
+        <td><code>medidas</code></td>
+        <td><span style="background:#16a34a;color:#fff;padding:2px 8px;border-radius:12px;font-size:12px;">PASSED</span></td>
+        <td style='text-align:center;'>1</td>
+        <td><span style="color:#64748b;font-size:12px;">Estándar</span></td>
+        <td style='text-align:right;'>0.268 ms</td>
+    </tr><tr>
+        <td><code>TC-MOD-CATE</code></td>
+        <td>Verificación de contrato de controlador y modelo para módulo &#039;categorias&#039;</td>
+        <td>Integración / Estructura</td>
+        <td><code>categorias</code></td>
+        <td><span style="background:#16a34a;color:#fff;padding:2px 8px;border-radius:12px;font-size:12px;">PASSED</span></td>
+        <td style='text-align:center;'>1</td>
+        <td><span style="color:#64748b;font-size:12px;">Estándar</span></td>
+        <td style='text-align:right;'>0.321 ms</td>
+    </tr><tr>
+        <td><code>TC-MOD-COMP</code></td>
+        <td>Verificación de contrato de controlador y modelo para módulo &#039;compras&#039;</td>
+        <td>Integración / Estructura</td>
+        <td><code>compras</code></td>
+        <td><span style="background:#16a34a;color:#fff;padding:2px 8px;border-radius:12px;font-size:12px;">PASSED</span></td>
+        <td style='text-align:center;'>1</td>
+        <td><span style="color:#64748b;font-size:12px;">Estándar</span></td>
+        <td style='text-align:right;'>0.225 ms</td>
+    </tr><tr>
+        <td><code>TC-MOD-COTI</code></td>
+        <td>Verificación de contrato de controlador y modelo para módulo &#039;cotizaciones&#039;</td>
+        <td>Integración / Estructura</td>
+        <td><code>cotizaciones</code></td>
+        <td><span style="background:#16a34a;color:#fff;padding:2px 8px;border-radius:12px;font-size:12px;">PASSED</span></td>
+        <td style='text-align:center;'>1</td>
+        <td><span style="color:#64748b;font-size:12px;">Estándar</span></td>
+        <td style='text-align:right;'>1.727 ms</td>
+    </tr><tr>
+        <td><code>TC-MOD-APAR</code></td>
+        <td>Verificación de contrato de controlador y modelo para módulo &#039;apartados&#039;</td>
+        <td>Integración / Estructura</td>
+        <td><code>apartados</code></td>
+        <td><span style="background:#16a34a;color:#fff;padding:2px 8px;border-radius:12px;font-size:12px;">PASSED</span></td>
+        <td style='text-align:center;'>1</td>
+        <td><span style="color:#64748b;font-size:12px;">Estándar</span></td>
+        <td style='text-align:right;'>0.282 ms</td>
+    </tr><tr>
+        <td><code>TC-MOD-CRED</code></td>
+        <td>Verificación de contrato de controlador y modelo para módulo &#039;creditos&#039;</td>
+        <td>Integración / Estructura</td>
+        <td><code>creditos</code></td>
+        <td><span style="background:#16a34a;color:#fff;padding:2px 8px;border-radius:12px;font-size:12px;">PASSED</span></td>
+        <td style='text-align:center;'>1</td>
+        <td><span style="color:#64748b;font-size:12px;">Estándar</span></td>
+        <td style='text-align:right;'>0.246 ms</td>
+    </tr><tr>
+        <td><code>TC-MOD-LAND</code></td>
+        <td>Verificación de contrato de controlador y modelo para módulo &#039;landing&#039;</td>
+        <td>Integración / Estructura</td>
+        <td><code>landing</code></td>
+        <td><span style="background:#16a34a;color:#fff;padding:2px 8px;border-radius:12px;font-size:12px;">PASSED</span></td>
+        <td style='text-align:center;'>1</td>
+        <td><span style="color:#64748b;font-size:12px;">Estándar</span></td>
+        <td style='text-align:right;'>0.267 ms</td>
+    </tr><tr>
+        <td><code>TC-MOD-ERRO</code></td>
+        <td>Verificación de contrato de controlador y modelo para módulo &#039;errors&#039;</td>
+        <td>Integración / Estructura</td>
+        <td><code>errors</code></td>
+        <td><span style="background:#16a34a;color:#fff;padding:2px 8px;border-radius:12px;font-size:12px;">PASSED</span></td>
+        <td style='text-align:center;'>1</td>
+        <td><span style="color:#64748b;font-size:12px;">Estándar</span></td>
+        <td style='text-align:right;'>0.248 ms</td>
+    </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>

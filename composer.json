@@ -1,7 +1,25 @@
 {
+    "name": "joelmendozataype/sistema-venta",
+    "description": "Sistema web de ventas en PHP + MySQL con suite de pruebas automatizadas y metricas",
     "require": {
         "phpoffice/phpspreadsheet": "^1.18",
         "luecano/numero-a-letras": "^3.0",
         "phpmailer/phpmailer": "^6.5"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10.5",
+        "php-webdriver/webdriver": "^1.15"
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "phpunit",
+        "test:unit": "phpunit --testsuite Unit",
+        "test:selenium": "phpunit --testsuite Selenium",
+        "test:coverage": "phpunit --coverage-html tests/reports/coverage-html --coverage-clover tests/reports/clover.xml",
+        "test:metrics": "php tests/run_metrics.php"
     }
 }

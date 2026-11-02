@@ -1,0 +1,270 @@
+{
+    "fecha_ejecucion": "2026-11-02 17:03:53",
+    "rama_git": "featuring\/jorge_sistema_ventas",
+    "cobertura": {
+        "modulos": {
+            "cubiertos": 17,
+            "totales": 17,
+            "porcentaje": 100
+        },
+        "rutas_acl": {
+            "cubiertas": 154,
+            "totales": 154,
+            "porcentaje": 100
+        },
+        "funciones_nucleo": {
+            "cubiertas": 15,
+            "totales": 15,
+            "porcentaje": 100
+        },
+        "selectores_selenium_dom": {
+            "cubiertos": 24,
+            "totales": 24,
+            "porcentaje": 100
+        },
+        "promedio_global_porcentaje": 100
+    },
+    "efectividad": {
+        "total_casos_ejecutados": 19,
+        "casos_exitosos": 19,
+        "casos_fallidos": 0,
+        "tasa_exito_porcentaje": 100,
+        "defectos_sembrados_evaluados": 8,
+        "defectos_detectados": 8,
+        "efectividad_deteccion_defectos_dde_porcentaje": 100,
+        "total_aserciones": 237,
+        "densidad_aserciones_por_caso": 12.47,
+        "rendimiento_deteccion_por_caso_porcentaje": 42.11,
+        "tiempo_total_ms": 479.566
+    },
+    "resultados_pruebas": [
+        {
+            "id": "TC-UNIT-01",
+            "nombre": "Sanitización de SQL Injection y XSS en strClean()",
+            "categoria": "Seguridad \/ Unidad",
+            "modulo": "usuarios",
+            "estado": "PASSED",
+            "passed": true,
+            "assertions": 9,
+            "duration_ms": 2.95,
+            "detected_defect": true,
+            "detalle": "Neutraliza vectores XSS y SQLi correctamente"
+        },
+        {
+            "id": "TC-UNIT-02",
+            "nombre": "Validación de fronteras en motivoAuditoria() (mín 10, máx 255 caracteres)",
+            "categoria": "Frontera \/ Unidad",
+            "modulo": "auditoria",
+            "estado": "PASSED",
+            "passed": true,
+            "assertions": 3,
+            "duration_ms": 0.503,
+            "detected_defect": true,
+            "detalle": "Valores límite (9, 10, 255, 256) verificados"
+        },
+        {
+            "id": "TC-UNIT-03",
+            "nombre": "Hashing Bcrypt y migración transparente de SHA-256 en claveHash\/claveVerificar\/claveRehash",
+            "categoria": "Criptografía \/ Unidad",
+            "modulo": "usuarios",
+            "estado": "PASSED",
+            "passed": true,
+            "assertions": 5,
+            "duration_ms": 468.21,
+            "detected_defect": true,
+            "detalle": "Verificación dual Bcrypt + SHA-256 y detección de rehash exitosas"
+        },
+        {
+            "id": "TC-UNIT-04",
+            "nombre": "Versionado cache-busting de recursos estáticos con asset()",
+            "categoria": "Unidad",
+            "modulo": "home",
+            "estado": "PASSED",
+            "passed": true,
+            "assertions": 2,
+            "duration_ms": 0.784,
+            "detected_defect": false,
+            "detalle": "Cache-busting ?v=timestamp verificado"
+        },
+        {
+            "id": "TC-RBAC-01",
+            "nombre": "Verificación exhaustiva del mapa de rutas ACL (Config\/Permisos.php) contra Controladores",
+            "categoria": "Integración \/ RBAC",
+            "modulo": "administracion",
+            "estado": "PASSED",
+            "passed": true,
+            "assertions": 171,
+            "duration_ms": 0.448,
+            "detected_defect": true,
+            "detalle": "17 módulos y todas sus reglas de autorización verificadas"
+        },
+        {
+            "id": "TC-RBAC-02",
+            "nombre": "Separación estricta de privilegios crear vs modificar en endpoints registrar()",
+            "categoria": "Seguridad \/ RBAC",
+            "modulo": "productos",
+            "estado": "PASSED",
+            "passed": true,
+            "assertions": 14,
+            "duration_ms": 0.259,
+            "detected_defect": true,
+            "detalle": "7 módulos CRUD separan permisos de creación (id vacío) y edición (id con valor)"
+        },
+        {
+            "id": "TC-SEL-DOM-01",
+            "nombre": "Sincronización de selectores Selenium LoginPage con plantilla real Views\/index.php",
+            "categoria": "Selenium POM \/ DOM",
+            "modulo": "usuarios",
+            "estado": "PASSED",
+            "passed": true,
+            "assertions": 8,
+            "duration_ms": 0.828,
+            "detected_defect": true,
+            "detalle": "8\/8 selectores CSS de LoginPage coinciden exactamente con Views\/index.php"
+        },
+        {
+            "id": "TC-SEL-DOM-02",
+            "nombre": "Sincronización de selectores Selenium CajaArqueoPage con Views\/cajas\/arqueo.php y modal apertura",
+            "categoria": "Selenium POM \/ DOM",
+            "modulo": "cajas",
+            "estado": "PASSED",
+            "passed": true,
+            "assertions": 5,
+            "duration_ms": 0.924,
+            "detected_defect": true,
+            "detalle": "Selectores de apertura\/cierre de caja validados contra las vistas PHP"
+        },
+        {
+            "id": "TC-SEL-DOM-03",
+            "nombre": "Sincronización de selectores Selenium NuevaVentaPage con Views\/ventas\/index.php y flujos transaccionales",
+            "categoria": "Selenium POM \/ DOM",
+            "modulo": "ventas",
+            "estado": "PASSED",
+            "passed": true,
+            "assertions": 10,
+            "duration_ms": 0.486,
+            "detected_defect": true,
+            "detalle": "10\/10 selectores interactivos de NuevaVentaPage validados"
+        },
+        {
+            "id": "TC-MOD-CLIE",
+            "nombre": "Verificación de contrato de controlador y modelo para módulo 'clientes'",
+            "categoria": "Integración \/ Estructura",
+            "modulo": "clientes",
+            "estado": "PASSED",
+            "passed": true,
+            "assertions": 1,
+            "duration_ms": 0.337,
+            "detected_defect": false,
+            "detalle": "Controlador Clientes.php verificado"
+        },
+        {
+            "id": "TC-MOD-PROV",
+            "nombre": "Verificación de contrato de controlador y modelo para módulo 'proveedor'",
+            "categoria": "Integración \/ Estructura",
+            "modulo": "proveedor",
+            "estado": "PASSED",
+            "passed": true,
+            "assertions": 1,
+            "duration_ms": 0.253,
+            "detected_defect": false,
+            "detalle": "Controlador Proveedor.php verificado"
+        },
+        {
+            "id": "TC-MOD-MEDI",
+            "nombre": "Verificación de contrato de controlador y modelo para módulo 'medidas'",
+            "categoria": "Integración \/ Estructura",
+            "modulo": "medidas",
+            "estado": "PASSED",
+            "passed": true,
+            "assertions": 1,
+            "duration_ms": 0.268,
+            "detected_defect": false,
+            "detalle": "Controlador Medidas.php verificado"
+        },
+        {
+            "id": "TC-MOD-CATE",
+            "nombre": "Verificación de contrato de controlador y modelo para módulo 'categorias'",
+            "categoria": "Integración \/ Estructura",
+            "modulo": "categorias",
+            "estado": "PASSED",
+            "passed": true,
+            "assertions": 1,
+            "duration_ms": 0.321,
+            "detected_defect": false,
+            "detalle": "Controlador Categorias.php verificado"
+        },
+        {
+            "id": "TC-MOD-COMP",
+            "nombre": "Verificación de contrato de controlador y modelo para módulo 'compras'",
+            "categoria": "Integración \/ Estructura",
+            "modulo": "compras",
+            "estado": "PASSED",
+            "passed": true,
+            "assertions": 1,
+            "duration_ms": 0.225,
+            "detected_defect": false,
+            "detalle": "Controlador Compras.php verificado"
+        },
+        {
+            "id": "TC-MOD-COTI",
+            "nombre": "Verificación de contrato de controlador y modelo para módulo 'cotizaciones'",
+            "categoria": "Integración \/ Estructura",
+            "modulo": "cotizaciones",
+            "estado": "PASSED",
+            "passed": true,
+            "assertions": 1,
+            "duration_ms": 1.727,
+            "detected_defect": false,
+            "detalle": "Controlador Cotizaciones.php verificado"
+        },
+        {
+            "id": "TC-MOD-APAR",
+            "nombre": "Verificación de contrato de controlador y modelo para módulo 'apartados'",
+            "categoria": "Integración \/ Estructura",
+            "modulo": "apartados",
+            "estado": "PASSED",
+            "passed": true,
+            "assertions": 1,
+            "duration_ms": 0.282,
+            "detected_defect": false,
+            "detalle": "Controlador Apartados.php verificado"
+        },
+        {
+            "id": "TC-MOD-CRED",
+            "nombre": "Verificación de contrato de controlador y modelo para módulo 'creditos'",
+            "categoria": "Integración \/ Estructura",
+            "modulo": "creditos",
+            "estado": "PASSED",
+            "passed": true,
+            "assertions": 1,
+            "duration_ms": 0.246,
+            "detected_defect": false,
+            "detalle": "Controlador Creditos.php verificado"
+        },
+        {
+            "id": "TC-MOD-LAND",
+            "nombre": "Verificación de contrato de controlador y modelo para módulo 'landing'",
+            "categoria": "Integración \/ Estructura",
+            "modulo": "landing",
+            "estado": "PASSED",
+            "passed": true,
+            "assertions": 1,
+            "duration_ms": 0.267,
+            "detected_defect": false,
+            "detalle": "Controlador Landing.php verificado"
+        },
+        {
+            "id": "TC-MOD-ERRO",
+            "nombre": "Verificación de contrato de controlador y modelo para módulo 'errors'",
+            "categoria": "Integración \/ Estructura",
+            "modulo": "errors",
+            "estado": "PASSED",
+            "passed": true,
+            "assertions": 1,
+            "duration_ms": 0.248,
+            "detected_defect": false,
+            "detalle": "Controlador Errors.php verificado"
+        }
+    ]
+}
