@@ -76,6 +76,22 @@ Combinando pruebas **End-to-End con Selenium WebDriver (`SistemaVentaSeleniumTes
 | **TC-MOD-CLIE a ERRO** | Verificación estructural de los 10 controladores restantes (`Clientes`, `Proveedor`, `Medidas`, `Categorias`, `Compras`, `Cotizaciones`, `Apartados`, `Creditos`, `Landing`, `Errors`) | Integración / Estructura | 10 módulos | Verificación Estructural | 10 | Estándar | 3.727 ms | **PASSED** |
 | **TC-SEL-01 a 06** | Suite E2E Selenium WebDriver (`SistemaVentaSeleniumTest`: Login SuperAdmin, Credenciales Inválidas, SQLi en Login, RBAC Asesor -> Auditoría, Apertura de Caja y Nueva Venta) | E2E Selenium WebDriver | `usuarios`, `auditoria`, `cajas`, `ventas` | Caja Negra E2E (POM) | 10 | Validación integral en navegador Chrome | Ejecución en navegador | **PASSED** |
 
+### 3.1. Desglose Detallado de las 237 Aserciones por Caso de Prueba (Densidad = 12.47)
+
+| ID Caso | Caso de Prueba | Nº Aserciones | ¿Qué comprueba exactamente cada Aserción? |
+| :--- | :--- | :---: | :--- |
+| **`TC-UNIT-01`** | Sanitización de SQL Injection y XSS en `strClean()` | **9** | Evalúa **3 payloads maliciosos** (`<script>...`, `admin' OR '1'='1 --`, `SELECT * ... DROP TABLE`). Por cada uno ejecuta **3 comprobaciones** (`3 × 3 = 9`): 1) Ausencia de `<script>`, 2) Ausencia de `OR '1'='1'`, 3) Ausencia de `DROP TABLE`. |
+| **`TC-UNIT-02`** | Validación de fronteras en `motivoAuditoria()` | **3** | 1) Que un motivo de **9 caracteres** sea rechazado (`=== null`), 2) Que un motivo de **10 caracteres exactos** sea aceptado, 3) Que un motivo de **256 caracteres** sea rechazado (`=== null`). |
+| **`TC-UNIT-03`** | Hashing Bcrypt y migración de SHA-256 en `claveVerificar()` | **5** | 1) Acepta clave correcta en Bcrypt, 2) Rechaza clave errónea (`false`), 3) Acepta hash antiguo SHA-256, 4) `claveRehash()` detecta que SHA-256 requiere migración (`true`), 5) `claveRehash()` confirma que Bcrypt no requiere cambio (`false`). |
+| **`TC-UNIT-04`** | Versionado de archivos estáticos con `asset()` | **2** | 1) Que `asset('assets/js/login.js')` agregue el timestamp `?v=...`, 2) Que un archivo inexistente devuelva `?v=0`. |
+| **`TC-RBAC-01`** | Verificación del mapa ACL (`Config/Permisos.php`) | **171** | 1) Comprueba la existencia de los **17 módulos** del sistema (`17` aserciones), 2) Comprueba una por una que las **154 rutas/acciones** del mapa tengan una regla de seguridad no vacía (`154` aserciones). Total: `17 + 154 = 171`. |
+| **`TC-RBAC-02`** | Separación de permisos `crear` vs `modificar` en CRUD | **14** | Evalúa los **7 módulos CRUD** (`usuarios`, `cajas`, `clientes`, `proveedor`, `medidas`, `categorias`, `productos`) con **2 comprobaciones por módulo** (`7 × 2 = 14`): 1) Existencia de llave `'guardar'`, 2) Separación de permisos `crear_*` y `modificar_*`. |
+| **`TC-SEL-DOM-01`** | Sincronización de `LoginPage` con `Views/index.php` | **8** | Comprueba que existan en el HTML los **8 IDs** usados por Selenium: `#correo`, `#clave`, `#btnAccion`, `#alerta`, `#frmLogin`, `#myModal`, `#correo_reset`, `#accion`. |
+| **`TC-SEL-DOM-02`** | Sincronización de `CajaArqueoPage` con vistas de Caja | **5** | Comprueba en `Views/cajas/arqueo.php` y `Views/modals/apertura.php` los **5 selectores**: `#btnAbrirCaja`, `#btnCerrarCaja`, `#t_arqueo`, `#monto_inicial`, `#btnAccion`. |
+| **`TC-SEL-DOM-03`** | Sincronización de `NuevaVentaPage` con `Views/ventas/index.php` | **10** | Comprueba los **10 controles interactivos** de la pantalla de ventas: `#buscarVenta`, `#errorBusquedaVenta`, `#tblDetalleVenta`, `#alert_total`, `#pagar_con`, `#cambio`, `#buscarCliente`, `#metodo`, botón `procesarVenta()` y botón `anularVenta`. |
+| **`TC-MOD-CLIE` a `TC-MOD-ERRO`** *(10 casos)* | Verificación estructural de los 10 controladores restantes | **10** *(1 c/u)* | Comprueba para cada uno de los **10 módulos** (`Clientes`, `Proveedor`, `Medidas`, `Categorias`, `Compras`, `Cotizaciones`, `Apartados`, `Creditos`, `Landing`, `Errors`) que su archivo controlador `.php` exista y sea cargable (`10 × 1 = 10`). |
+| **TOTAL** | **19 Casos de Prueba Ejecutados** | **237** | **Promedio (Densidad de Aserciones): `237 / 19 = 12.47 aserciones por caso`** |
+
 ## 4. Implementación Técnica en PHP con Selenium WebDriver (Patrón POM)
 
 La solución fue implementada directamente en el repositorio del proyecto (`featuring/jorge_sistema_ventas`) en **PHP 8.2.12 (XAMPP)** utilizando **PHPUnit 10.5**, **`php-webdriver/webdriver` 1.15**, un cliente nativo W3C WebDriver (`tests/Selenium/W3CWebDriverClient.php`) y el recolector automatizado de métricas (`tests/Metrics/CoverageAndEffectivenessCollector.php`).
@@ -440,3 +456,4 @@ Para medir de forma verídica la capacidad de detección de la suite, se evaluar
 2. **Sobre la Efectividad:** Con **237 aserciones distribuidas en 19 casos de prueba** (densidad de **12.47 aserciones por caso**), la suite demostró una **Efectividad de Detección de Defectos (DDE) del 100.00% (8/8)** frente a vectores de inyección SQL/XSS, violaciones de valores límite en auditoría, hashes criptográficos obsoletos, escalación de privilegios CRUD y cambios estructurales en las vistas PHP.
 
 3. **Sobre la Viabilidad y Reproducibilidad en CI/CD:** La suite se ejecuta en **479.566 milisegundos** y genera automáticamente reportes auditables en formato JSON (`tests/reports/metricas.json`) y HTML (`tests/reports/reporte_metricas.html`), además de integrar las pruebas E2E de navegador con `php-webdriver/webdriver` y PHPUnit (`tests/Selenium/SistemaVentaSeleniumTest.php`).
+

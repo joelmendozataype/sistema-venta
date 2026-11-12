@@ -24,7 +24,7 @@
 <body>
 <div class="container">
     <h1>Métricas de Cobertura y Efectividad en Pruebas Automatizadas</h1>
-    <div class="subtitle">Proyecto: <strong>Sistema Venta (PHP + Selenium WebDriver)</strong> | Rama: <code>featuring/jorge_sistema_ventas</code> | Fecha: 2026-11-02 17:03:53</div>
+    <div class="subtitle">Proyecto: <strong>Sistema Venta (PHP + Selenium WebDriver)</strong> | Rama: <code>featuring/jorge_sistema_ventas</code> | Fecha: 2026-11-10 02:02:49</div>
 
     <h2>1. Métricas de Cobertura (Coverage)</h2>
     <div class="grid">
@@ -75,7 +75,7 @@
         </div>
         <div class="card">
             <h3>Tiempo Total de Ejecución</h3>
-            <div class="metric-value">479.566 ms</div>
+            <div class="metric-value">376.683 ms</div>
             <div class="metric-sub">Servidor Selenium activo: No requerido para suite base</div>
         </div>
     </div>
@@ -89,7 +89,8 @@
                 <th>Categoría</th>
                 <th>Módulo</th>
                 <th>Estado</th>
-                <th>Aserciones</th>
+                <th>Nº Aserciones</th>
+                <th>¿Qué comprueban las Aserciones?</th>
                 <th>Efectividad DDE</th>
                 <th>Tiempo</th>
             </tr>
@@ -101,171 +102,190 @@
         <td>Seguridad / Unidad</td>
         <td><code>usuarios</code></td>
         <td><span style="background:#16a34a;color:#fff;padding:2px 8px;border-radius:12px;font-size:12px;">PASSED</span></td>
-        <td style='text-align:center;'>9</td>
+        <td style='text-align:center;font-weight:700;'>9</td>
+        <td style='font-size:13px;color:#334155;'>Neutraliza vectores XSS y SQLi correctamente</td>
         <td><span style="background:#2563eb;color:#fff;padding:2px 8px;border-radius:12px;font-size:12px;">Defecto Detectado</span></td>
-        <td style='text-align:right;'>2.95 ms</td>
+        <td style='text-align:right;'>0.678 ms</td>
     </tr><tr>
         <td><code>TC-UNIT-02</code></td>
         <td>Validación de fronteras en motivoAuditoria() (mín 10, máx 255 caracteres)</td>
         <td>Frontera / Unidad</td>
         <td><code>auditoria</code></td>
         <td><span style="background:#16a34a;color:#fff;padding:2px 8px;border-radius:12px;font-size:12px;">PASSED</span></td>
-        <td style='text-align:center;'>3</td>
+        <td style='text-align:center;font-weight:700;'>3</td>
+        <td style='font-size:13px;color:#334155;'>Valores límite (9, 10, 255, 256) verificados</td>
         <td><span style="background:#2563eb;color:#fff;padding:2px 8px;border-radius:12px;font-size:12px;">Defecto Detectado</span></td>
-        <td style='text-align:right;'>0.503 ms</td>
+        <td style='text-align:right;'>2.241 ms</td>
     </tr><tr>
         <td><code>TC-UNIT-03</code></td>
         <td>Hashing Bcrypt y migración transparente de SHA-256 en claveHash/claveVerificar/claveRehash</td>
         <td>Criptografía / Unidad</td>
         <td><code>usuarios</code></td>
         <td><span style="background:#16a34a;color:#fff;padding:2px 8px;border-radius:12px;font-size:12px;">PASSED</span></td>
-        <td style='text-align:center;'>5</td>
+        <td style='text-align:center;font-weight:700;'>5</td>
+        <td style='font-size:13px;color:#334155;'>Verificación dual Bcrypt + SHA-256 y detección de rehash exitosas</td>
         <td><span style="background:#2563eb;color:#fff;padding:2px 8px;border-radius:12px;font-size:12px;">Defecto Detectado</span></td>
-        <td style='text-align:right;'>468.21 ms</td>
+        <td style='text-align:right;'>367.105 ms</td>
     </tr><tr>
         <td><code>TC-UNIT-04</code></td>
         <td>Versionado cache-busting de recursos estáticos con asset()</td>
         <td>Unidad</td>
         <td><code>home</code></td>
         <td><span style="background:#16a34a;color:#fff;padding:2px 8px;border-radius:12px;font-size:12px;">PASSED</span></td>
-        <td style='text-align:center;'>2</td>
+        <td style='text-align:center;font-weight:700;'>2</td>
+        <td style='font-size:13px;color:#334155;'>Cache-busting ?v=timestamp verificado</td>
         <td><span style="color:#64748b;font-size:12px;">Estándar</span></td>
-        <td style='text-align:right;'>0.784 ms</td>
+        <td style='text-align:right;'>0.616 ms</td>
     </tr><tr>
         <td><code>TC-RBAC-01</code></td>
         <td>Verificación exhaustiva del mapa de rutas ACL (Config/Permisos.php) contra Controladores</td>
         <td>Integración / RBAC</td>
         <td><code>administracion</code></td>
         <td><span style="background:#16a34a;color:#fff;padding:2px 8px;border-radius:12px;font-size:12px;">PASSED</span></td>
-        <td style='text-align:center;'>171</td>
+        <td style='text-align:center;font-weight:700;'>171</td>
+        <td style='font-size:13px;color:#334155;'>17 módulos y todas sus reglas de autorización verificadas</td>
         <td><span style="background:#2563eb;color:#fff;padding:2px 8px;border-radius:12px;font-size:12px;">Defecto Detectado</span></td>
-        <td style='text-align:right;'>0.448 ms</td>
+        <td style='text-align:right;'>1.273 ms</td>
     </tr><tr>
         <td><code>TC-RBAC-02</code></td>
         <td>Separación estricta de privilegios crear vs modificar en endpoints registrar()</td>
         <td>Seguridad / RBAC</td>
         <td><code>productos</code></td>
         <td><span style="background:#16a34a;color:#fff;padding:2px 8px;border-radius:12px;font-size:12px;">PASSED</span></td>
-        <td style='text-align:center;'>14</td>
+        <td style='text-align:center;font-weight:700;'>14</td>
+        <td style='font-size:13px;color:#334155;'>7 módulos CRUD separan permisos de creación (id vacío) y edición (id con valor)</td>
         <td><span style="background:#2563eb;color:#fff;padding:2px 8px;border-radius:12px;font-size:12px;">Defecto Detectado</span></td>
-        <td style='text-align:right;'>0.259 ms</td>
+        <td style='text-align:right;'>0.366 ms</td>
     </tr><tr>
         <td><code>TC-SEL-DOM-01</code></td>
         <td>Sincronización de selectores Selenium LoginPage con plantilla real Views/index.php</td>
         <td>Selenium POM / DOM</td>
         <td><code>usuarios</code></td>
         <td><span style="background:#16a34a;color:#fff;padding:2px 8px;border-radius:12px;font-size:12px;">PASSED</span></td>
-        <td style='text-align:center;'>8</td>
+        <td style='text-align:center;font-weight:700;'>8</td>
+        <td style='font-size:13px;color:#334155;'>8/8 selectores CSS de LoginPage coinciden exactamente con Views/index.php</td>
         <td><span style="background:#2563eb;color:#fff;padding:2px 8px;border-radius:12px;font-size:12px;">Defecto Detectado</span></td>
-        <td style='text-align:right;'>0.828 ms</td>
+        <td style='text-align:right;'>0.989 ms</td>
     </tr><tr>
         <td><code>TC-SEL-DOM-02</code></td>
         <td>Sincronización de selectores Selenium CajaArqueoPage con Views/cajas/arqueo.php y modal apertura</td>
         <td>Selenium POM / DOM</td>
         <td><code>cajas</code></td>
         <td><span style="background:#16a34a;color:#fff;padding:2px 8px;border-radius:12px;font-size:12px;">PASSED</span></td>
-        <td style='text-align:center;'>5</td>
+        <td style='text-align:center;font-weight:700;'>5</td>
+        <td style='font-size:13px;color:#334155;'>Selectores de apertura/cierre de caja validados contra las vistas PHP</td>
         <td><span style="background:#2563eb;color:#fff;padding:2px 8px;border-radius:12px;font-size:12px;">Defecto Detectado</span></td>
-        <td style='text-align:right;'>0.924 ms</td>
+        <td style='text-align:right;'>1.191 ms</td>
     </tr><tr>
         <td><code>TC-SEL-DOM-03</code></td>
         <td>Sincronización de selectores Selenium NuevaVentaPage con Views/ventas/index.php y flujos transaccionales</td>
         <td>Selenium POM / DOM</td>
         <td><code>ventas</code></td>
         <td><span style="background:#16a34a;color:#fff;padding:2px 8px;border-radius:12px;font-size:12px;">PASSED</span></td>
-        <td style='text-align:center;'>10</td>
+        <td style='text-align:center;font-weight:700;'>10</td>
+        <td style='font-size:13px;color:#334155;'>10/10 selectores interactivos de NuevaVentaPage validados</td>
         <td><span style="background:#2563eb;color:#fff;padding:2px 8px;border-radius:12px;font-size:12px;">Defecto Detectado</span></td>
-        <td style='text-align:right;'>0.486 ms</td>
+        <td style='text-align:right;'>0.854 ms</td>
     </tr><tr>
         <td><code>TC-MOD-CLIE</code></td>
         <td>Verificación de contrato de controlador y modelo para módulo &#039;clientes&#039;</td>
         <td>Integración / Estructura</td>
         <td><code>clientes</code></td>
         <td><span style="background:#16a34a;color:#fff;padding:2px 8px;border-radius:12px;font-size:12px;">PASSED</span></td>
-        <td style='text-align:center;'>1</td>
+        <td style='text-align:center;font-weight:700;'>1</td>
+        <td style='font-size:13px;color:#334155;'>Controlador Clientes.php verificado</td>
         <td><span style="color:#64748b;font-size:12px;">Estándar</span></td>
-        <td style='text-align:right;'>0.337 ms</td>
+        <td style='text-align:right;'>0.25 ms</td>
     </tr><tr>
         <td><code>TC-MOD-PROV</code></td>
         <td>Verificación de contrato de controlador y modelo para módulo &#039;proveedor&#039;</td>
         <td>Integración / Estructura</td>
         <td><code>proveedor</code></td>
         <td><span style="background:#16a34a;color:#fff;padding:2px 8px;border-radius:12px;font-size:12px;">PASSED</span></td>
-        <td style='text-align:center;'>1</td>
+        <td style='text-align:center;font-weight:700;'>1</td>
+        <td style='font-size:13px;color:#334155;'>Controlador Proveedor.php verificado</td>
         <td><span style="color:#64748b;font-size:12px;">Estándar</span></td>
-        <td style='text-align:right;'>0.253 ms</td>
+        <td style='text-align:right;'>0.131 ms</td>
     </tr><tr>
         <td><code>TC-MOD-MEDI</code></td>
         <td>Verificación de contrato de controlador y modelo para módulo &#039;medidas&#039;</td>
         <td>Integración / Estructura</td>
         <td><code>medidas</code></td>
         <td><span style="background:#16a34a;color:#fff;padding:2px 8px;border-radius:12px;font-size:12px;">PASSED</span></td>
-        <td style='text-align:center;'>1</td>
+        <td style='text-align:center;font-weight:700;'>1</td>
+        <td style='font-size:13px;color:#334155;'>Controlador Medidas.php verificado</td>
         <td><span style="color:#64748b;font-size:12px;">Estándar</span></td>
-        <td style='text-align:right;'>0.268 ms</td>
+        <td style='text-align:right;'>0.128 ms</td>
     </tr><tr>
         <td><code>TC-MOD-CATE</code></td>
         <td>Verificación de contrato de controlador y modelo para módulo &#039;categorias&#039;</td>
         <td>Integración / Estructura</td>
         <td><code>categorias</code></td>
         <td><span style="background:#16a34a;color:#fff;padding:2px 8px;border-radius:12px;font-size:12px;">PASSED</span></td>
-        <td style='text-align:center;'>1</td>
+        <td style='text-align:center;font-weight:700;'>1</td>
+        <td style='font-size:13px;color:#334155;'>Controlador Categorias.php verificado</td>
         <td><span style="color:#64748b;font-size:12px;">Estándar</span></td>
-        <td style='text-align:right;'>0.321 ms</td>
+        <td style='text-align:right;'>0.125 ms</td>
     </tr><tr>
         <td><code>TC-MOD-COMP</code></td>
         <td>Verificación de contrato de controlador y modelo para módulo &#039;compras&#039;</td>
         <td>Integración / Estructura</td>
         <td><code>compras</code></td>
         <td><span style="background:#16a34a;color:#fff;padding:2px 8px;border-radius:12px;font-size:12px;">PASSED</span></td>
-        <td style='text-align:center;'>1</td>
+        <td style='text-align:center;font-weight:700;'>1</td>
+        <td style='font-size:13px;color:#334155;'>Controlador Compras.php verificado</td>
         <td><span style="color:#64748b;font-size:12px;">Estándar</span></td>
-        <td style='text-align:right;'>0.225 ms</td>
+        <td style='text-align:right;'>0.127 ms</td>
     </tr><tr>
         <td><code>TC-MOD-COTI</code></td>
         <td>Verificación de contrato de controlador y modelo para módulo &#039;cotizaciones&#039;</td>
         <td>Integración / Estructura</td>
         <td><code>cotizaciones</code></td>
         <td><span style="background:#16a34a;color:#fff;padding:2px 8px;border-radius:12px;font-size:12px;">PASSED</span></td>
-        <td style='text-align:center;'>1</td>
+        <td style='text-align:center;font-weight:700;'>1</td>
+        <td style='font-size:13px;color:#334155;'>Controlador Cotizaciones.php verificado</td>
         <td><span style="color:#64748b;font-size:12px;">Estándar</span></td>
-        <td style='text-align:right;'>1.727 ms</td>
+        <td style='text-align:right;'>0.134 ms</td>
     </tr><tr>
         <td><code>TC-MOD-APAR</code></td>
         <td>Verificación de contrato de controlador y modelo para módulo &#039;apartados&#039;</td>
         <td>Integración / Estructura</td>
         <td><code>apartados</code></td>
         <td><span style="background:#16a34a;color:#fff;padding:2px 8px;border-radius:12px;font-size:12px;">PASSED</span></td>
-        <td style='text-align:center;'>1</td>
+        <td style='text-align:center;font-weight:700;'>1</td>
+        <td style='font-size:13px;color:#334155;'>Controlador Apartados.php verificado</td>
         <td><span style="color:#64748b;font-size:12px;">Estándar</span></td>
-        <td style='text-align:right;'>0.282 ms</td>
+        <td style='text-align:right;'>0.122 ms</td>
     </tr><tr>
         <td><code>TC-MOD-CRED</code></td>
         <td>Verificación de contrato de controlador y modelo para módulo &#039;creditos&#039;</td>
         <td>Integración / Estructura</td>
         <td><code>creditos</code></td>
         <td><span style="background:#16a34a;color:#fff;padding:2px 8px;border-radius:12px;font-size:12px;">PASSED</span></td>
-        <td style='text-align:center;'>1</td>
+        <td style='text-align:center;font-weight:700;'>1</td>
+        <td style='font-size:13px;color:#334155;'>Controlador Creditos.php verificado</td>
         <td><span style="color:#64748b;font-size:12px;">Estándar</span></td>
-        <td style='text-align:right;'>0.246 ms</td>
+        <td style='text-align:right;'>0.117 ms</td>
     </tr><tr>
         <td><code>TC-MOD-LAND</code></td>
         <td>Verificación de contrato de controlador y modelo para módulo &#039;landing&#039;</td>
         <td>Integración / Estructura</td>
         <td><code>landing</code></td>
         <td><span style="background:#16a34a;color:#fff;padding:2px 8px;border-radius:12px;font-size:12px;">PASSED</span></td>
-        <td style='text-align:center;'>1</td>
+        <td style='text-align:center;font-weight:700;'>1</td>
+        <td style='font-size:13px;color:#334155;'>Controlador Landing.php verificado</td>
         <td><span style="color:#64748b;font-size:12px;">Estándar</span></td>
-        <td style='text-align:right;'>0.267 ms</td>
+        <td style='text-align:right;'>0.118 ms</td>
     </tr><tr>
         <td><code>TC-MOD-ERRO</code></td>
         <td>Verificación de contrato de controlador y modelo para módulo &#039;errors&#039;</td>
         <td>Integración / Estructura</td>
         <td><code>errors</code></td>
         <td><span style="background:#16a34a;color:#fff;padding:2px 8px;border-radius:12px;font-size:12px;">PASSED</span></td>
-        <td style='text-align:center;'>1</td>
+        <td style='text-align:center;font-weight:700;'>1</td>
+        <td style='font-size:13px;color:#334155;'>Controlador Errors.php verificado</td>
         <td><span style="color:#64748b;font-size:12px;">Estándar</span></td>
-        <td style='text-align:right;'>0.248 ms</td>
+        <td style='text-align:right;'>0.118 ms</td>
     </tr>
         </tbody>
     </table>

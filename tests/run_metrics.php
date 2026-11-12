@@ -420,7 +420,8 @@ foreach ($metrics['resultados_pruebas'] as $r) {
         <td>{$r['categoria']}</td>
         <td><code>{$r['modulo']}</code></td>
         <td>{$badge}</td>
-        <td style='text-align:center;'>{$r['assertions']}</td>
+        <td style='text-align:center;font-weight:700;'>{$r['assertions']}</td>
+        <td style='font-size:13px;color:#334155;'>" . htmlspecialchars($r['detalle']) . "</td>
         <td>{$defectBadge}</td>
         <td style='text-align:right;'>{$r['duration_ms']} ms</td>
     </tr>";
@@ -518,7 +519,8 @@ $htmlReport = <<<HTML
                 <th>Categoría</th>
                 <th>Módulo</th>
                 <th>Estado</th>
-                <th>Aserciones</th>
+                <th>Nº Aserciones</th>
+                <th>¿Qué comprueban las Aserciones?</th>
                 <th>Efectividad DDE</th>
                 <th>Tiempo</th>
             </tr>

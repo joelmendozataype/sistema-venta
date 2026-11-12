@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Desglose de las 237 Aserciones por Caso de Prueba - Sistema Venta</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: #f8fafc;
+            color: #0f172a;
+            margin: 0;
+            padding: 32px;
+        }
+        .container {
+            max-width: 1220px;
+            margin: 0 auto;
+        }
+        .header-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 24px 28px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        .header-title h1 {
+            margin: 0 0 6px 0;
+            font-size: 24px;
+            color: #1e293b;
+        }
+        .header-title p {
+            margin: 0;
+            font-size: 14px;
+            color: #64748b;
+        }
+        .kpi-group {
+            display: flex;
+            gap: 14px;
+        }
+        .kpi-box {
+            background: #f1f5f9;
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            padding: 10px 18px;
+            text-align: center;
+        }
+        .kpi-box.highlight {
+            background: #eff6ff;
+            border-color: #93c5fd;
+        }
+        .kpi-box .num {
+            font-size: 22px;
+            font-weight: 700;
+            color: #0f172a;
+        }
+        .kpi-box.highlight .num {
+            color: #1d4ed8;
+        }
+        .kpi-box .lbl {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #475569;
+            font-weight: 600;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #ffffff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+            border: 1px solid #e2e8f0;
+        }
+        th, td {
+            padding: 14px 16px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 14px;
+            vertical-align: top;
+            line-height: 1.5;
+        }
+        th {
+            background: #1e293b;
+            color: #ffffff;
+            font-weight: 600;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+        tr:nth-child(even) {
+            background: #f8fafc;
+        }
+        tr:hover {
+            background: #f1f5f9;
+        }
+        code {
+            background: #e2e8f0;
+            color: #0f172a;
+            padding: 2px 6px;
+            border-radius: 5px;
+            font-family: Consolas, monospace;
+            font-size: 12.5px;
+        }
+        .id-badge {
+            display: inline-block;
+            background: #e0e7ff;
+            color: #1e40af;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-family: Consolas, monospace;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+        .count-badge {
+            display: inline-block;
+            background: #16a34a;
+            color: #ffffff;
+            font-weight: 700;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            min-width: 28px;
+            text-align: center;
+        }
+        .count-badge.high {
+            background: #2563eb;
+        }
+        .check-list {
+            margin: 4px 0 0 0;
+            padding-left: 18px;
+        }
+        .check-list li {
+            margin-bottom: 3px;
+        }
+        tfoot tr {
+            background: #0f172a !important;
+            color: #ffffff;
+            font-weight: 700;
+        }
+        tfoot td {
+            border-bottom: none;
+            font-size: 15px;
+            padding: 16px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header-card">
+        <div class="header-title">
+            <h1>Desglose Exacto de Aserciones por Caso de Prueba</h1>
+            <p>Proyecto: <strong>Sistema Venta (PHP + Selenium WebDriver)</strong> | Estándar: <strong>ISO/IEC 25023</strong></p>
+        </div>
+        <div class="kpi-group">
+            <div class="kpi-box">
+                <div class="num">19</div>
+                <div class="lbl">Casos Ejecutados</div>
+            </div>
+            <div class="kpi-box">
+                <div class="num">237</div>
+                <div class="lbl">Total Aserciones</div>
+            </div>
+            <div class="kpi-box highlight">
+                <div class="num">12.47</div>
+                <div class="lbl">Densidad (237 / 19)</div>
+            </div>
+        </div>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 150px;">ID Caso</th>
+                <th style="width: 280px;">Caso de Prueba</th>
+                <th style="width: 120px; text-align: center;">Nº Aserciones</th>
+                <th>¿Qué comprueba exactamente cada Aserción?</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><span class="id-badge">TC-UNIT-01</span></td>
+                <td><strong>Sanitización de SQL Injection y XSS en <code>strClean()</code></strong><br><span style="color:#64748b;font-size:12px;">Archivo: Config/Helpers.php</span></td>
+                <td style="text-align: center;"><span class="count-badge">9</span></td>
+                <td>
+                    Prueba <strong>3 textos maliciosos</strong> distintos (<code>&lt;script&gt;...</code>, <code>admin' OR '1'='1 --</code>, <code>SELECT * ... DROP TABLE</code>). Por cada uno hace <strong>3 comprobaciones</strong> (<code>3 × 3 = 9</code>):
+                    <ol class="check-list">
+                        <li>Que el resultado limpio no contenga la etiqueta <code>&lt;script&gt;</code>.</li>
+                        <li>Que no contenga la tautología de inyección SQL <code>OR '1'='1</code>.</li>
+                        <li>Que no contenga la instrucción destructiva <code>DROP TABLE</code>.</li>
+                    </ol>
+                </td>
+            </tr>
+            <tr>
+                <td><span class="id-badge">TC-UNIT-02</span></td>
+                <td><strong>Validación de fronteras en <code>motivoAuditoria()</code></strong><br><span style="color:#64748b;font-size:12px;">Archivo: Config/Helpers.php</span></td>
+                <td style="text-align: center;"><span class="count-badge">3</span></td>
+                <td>
+                    Evalúa los valores límite del motivo obligatorio de auditoría (rango válido: 10 a 255 caracteres):
+                    <ol class="check-list">
+                        <li>Que un texto de <strong>9 caracteres</strong> (límite inferior − 1) sea rechazado (<code>=== null</code>).</li>
+                        <li>Que un texto de <strong>10 caracteres exactos</strong> (límite inferior válido) sea aceptado.</li>
+                        <li>Que un texto de <strong>256 caracteres</strong> (límite superior + 1) sea rechazado (<code>=== null</code>).</li>
+                    </ol>
+                </td>
+            </tr>
+            <tr>
+                <td><span class="id-badge">TC-UNIT-03</span></td>
+                <td><strong>Hashing Bcrypt y migración de SHA-256 en <code>claveVerificar()</code></strong><br><span style="color:#64748b;font-size:12px;">Archivo: Config/Helpers.php</span></td>
+                <td style="text-align: center;"><span class="count-badge">5</span></td>
+                <td>
+                    Verifica la criptografía de contraseñas y compatibilidad con cuentas antiguas:
+                    <ol class="check-list">
+                        <li>Que <code>claveVerificar()</code> acepte la contraseña correcta cifrada con Bcrypt (<code>true</code>).</li>
+                        <li>Que rechace una contraseña incorrecta (<code>false</code>).</li>
+                        <li>Que acepte un hash antiguo de 64 caracteres en formato SHA-256 (<code>true</code>).</li>
+                        <li>Que <code>claveRehash()</code> detecte que el hash SHA-256 debe actualizarse a Bcrypt (<code>true</code>).</li>
+                        <li>Que <code>claveRehash()</code> confirme que un hash Bcrypt actual no requiere cambio (<code>false</code>).</li>
+                    </ol>
+                </td>
+            </tr>
+            <tr>
+                <td><span class="id-badge">TC-UNIT-04</span></td>
+                <td><strong>Versionado de archivos estáticos con <code>asset()</code></strong><br><span style="color:#64748b;font-size:12px;">Archivo: Config/Helpers.php</span></td>
+                <td style="text-align: center;"><span class="count-badge">2</span></td>
+                <td>
+                    <ol class="check-list">
+                        <li>Que <code>asset('assets/js/login.js')</code> agregue el parámetro de versión <code>?v=timestamp</code>.</li>
+                        <li>Que un archivo inexistente devuelva de forma segura el fallback <code>?v=0</code>.</li>
+                    </ol>
+                </td>
+            </tr>
+            <tr>
+                <td><span class="id-badge">TC-RBAC-01</span></td>
+                <td><strong>Verificación exhaustiva del mapa ACL (<code>Config/Permisos.php</code>)</strong><br><span style="color:#64748b;font-size:12px;">Archivo: Config/Permisos.php</span></td>
+                <td style="text-align: center;"><span class="count-badge high">171</span></td>
+                <td>
+                    Auditoría completa de la matriz de control de acceso basado en roles (RBAC):
+                    <ol class="check-list">
+                        <li>Comprueba la existencia y registro de los <strong>17 módulos</strong> del sistema (<code>17</code> aserciones).</li>
+                        <li>Comprueba una por una que las <strong>154 rutas/acciones</strong> del mapa tengan una regla de seguridad asignada y no vacía (<code>154</code> aserciones).</li>
+                    </ol>
+                    <em>Total del caso: <code>17 + 154 = 171 aserciones</code>.</em>
+                </td>
+            </tr>
+            <tr>
+                <td><span class="id-badge">TC-RBAC-02</span></td>
+                <td><strong>Separación de permisos <code>crear</code> vs <code>modificar</code> en CRUD</strong><br><span style="color:#64748b;font-size:12px;">Archivo: Config/Permisos.php</span></td>
+                <td style="text-align: center;"><span class="count-badge">14</span></td>
+                <td>
+                    Evalúa los <strong>7 módulos CRUD</strong> (<code>usuarios</code>, <code>cajas</code>, <code>clientes</code>, <code>proveedor</code>, <code>medidas</code>, <code>categorias</code>, <code>productos</code>) haciendo <strong>2 comprobaciones por módulo</strong> (<code>7 × 2 = 14</code>):
+                    <ol class="check-list">
+                        <li>Que la acción <code>registrar</code> contenga la estructura condicional <code>'guardar'</code>.</li>
+                        <li>Que tenga exactamente 2 permisos separados: <code>crear_*</code> (cuando <code>id</code> está vacío) y <code>modificar_*</code> (cuando <code>id</code> tiene valor).</li>
+                    </ol>
+                </td>
+            </tr>
+            <tr>
+                <td><span class="id-badge">TC-SEL-DOM-01</span></td>
+                <td><strong>Sincronización de <code>LoginPage</code> con <code>Views/index.php</code></strong><br><span style="color:#64748b;font-size:12px;">Selenium Page Object Model</span></td>
+                <td style="text-align: center;"><span class="count-badge">8</span></td>
+                <td>
+                    Comprueba que existan en el DOM real de <code>Views/index.php</code> los <strong>8 selectores ID</strong> utilizados por Selenium WebDriver:<br>
+                    <code>#correo</code>, <code>#clave</code>, <code>#btnAccion</code>, <code>#alerta</code>, <code>#frmLogin</code>, <code>#myModal</code>, <code>#correo_reset</code> y <code>#accion</code>.
+                </td>
+            </tr>
+            <tr>
+                <td><span class="id-badge">TC-SEL-DOM-02</span></td>
+                <td><strong>Sincronización de <code>CajaArqueoPage</code> con vistas de Caja</strong><br><span style="color:#64748b;font-size:12px;">Selenium Page Object Model</span></td>
+                <td style="text-align: center;"><span class="count-badge">5</span></td>
+                <td>
+                    Comprueba en <code>Views/cajas/arqueo.php</code> y <code>Views/modals/apertura.php</code> la presencia de los <strong>5 selectores</strong> de interacción:<br>
+                    <code>#btnAbrirCaja</code>, <code>#btnCerrarCaja</code>, <code>#t_arqueo</code>, <code>#monto_inicial</code> y <code>#btnAccion</code>.
+                </td>
+            </tr>
+            <tr>
+                <td><span class="id-badge">TC-SEL-DOM-03</span></td>
+                <td><strong>Sincronización de <code>NuevaVentaPage</code> con <code>Views/ventas/index.php</code></strong><br><span style="color:#64748b;font-size:12px;">Selenium Page Object Model</span></td>
+                <td style="text-align: center;"><span class="count-badge">10</span></td>
+                <td>
+                    Comprueba los <strong>10 controles interactivos</strong> de la pantalla transaccional de ventas:<br>
+                    <code>#buscarVenta</code>, <code>#errorBusquedaVenta</code>, <code>#tblDetalleVenta</code>, <code>#alert_total</code>, <code>#pagar_con</code>, <code>#cambio</code>, <code>#buscarCliente</code>, <code>#metodo</code>, botón <code>procesarVenta()</code> y botón <code>anularVenta</code>.
+                </td>
+            </tr>
+            <tr>
+                <td><span class="id-badge">TC-MOD-CLIE</span><br><span style="font-size:11px;color:#64748b;">a</span><br><span class="id-badge">TC-MOD-ERRO</span></td>
+                <td><strong>Verificación estructural de los 10 controladores restantes</strong><br><span style="color:#64748b;font-size:12px;">10 casos individuales (1 aserción c/u)</span></td>
+                <td style="text-align: center;"><span class="count-badge">10</span><br><span style="font-size:11px;color:#64748b;">(1 × 10)</span></td>
+                <td>
+                    Comprueba para cada uno de los <strong>10 módulos</strong> restantes (<code>Clientes</code>, <code>Proveedor</code>, <code>Medidas</code>, <code>Categorias</code>, <code>Compras</code>, <code>Cotizaciones</code>, <code>Apartados</code>, <code>Creditos</code>, <code>Landing</code>, <code>Errors</code>) que su archivo controlador <code>Controllers/*.php</code> exista e implemente su contrato base (<code>10 × 1 = 10 aserciones</code>).
+                </td>
+            </tr>
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="2">TOTAL GENERAL (19 Casos de Prueba Ejecutados)</td>
+                <td style="text-align: center;"><span class="count-badge high" style="font-size: 16px;">237</span></td>
+                <td>Promedio (Densidad de Aserciones): <code>237 aserciones / 19 casos = 12.47 aserciones por caso</code></td>
+            </tr>
+        </tfoot>
+    </table>
+</div>
+</body>
+</html>
+

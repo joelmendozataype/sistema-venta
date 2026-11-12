@@ -1,5 +1,5 @@
 {
-    "fecha_ejecucion": "2026-11-02 17:03:53",
+    "fecha_ejecucion": "2026-11-10 02:02:49",
     "rama_git": "featuring\/jorge_sistema_ventas",
     "cobertura": {
         "modulos": {
@@ -35,7 +35,7 @@
         "total_aserciones": 237,
         "densidad_aserciones_por_caso": 12.47,
         "rendimiento_deteccion_por_caso_porcentaje": 42.11,
-        "tiempo_total_ms": 479.566
+        "tiempo_total_ms": 376.683
     },
     "resultados_pruebas": [
         {
@@ -46,7 +46,7 @@
             "estado": "PASSED",
             "passed": true,
             "assertions": 9,
-            "duration_ms": 2.95,
+            "duration_ms": 0.678,
             "detected_defect": true,
             "detalle": "Neutraliza vectores XSS y SQLi correctamente"
         },
@@ -58,7 +58,7 @@
             "estado": "PASSED",
             "passed": true,
             "assertions": 3,
-            "duration_ms": 0.503,
+            "duration_ms": 2.241,
             "detected_defect": true,
             "detalle": "Valores límite (9, 10, 255, 256) verificados"
         },
@@ -70,7 +70,7 @@
             "estado": "PASSED",
             "passed": true,
             "assertions": 5,
-            "duration_ms": 468.21,
+            "duration_ms": 367.105,
             "detected_defect": true,
             "detalle": "Verificación dual Bcrypt + SHA-256 y detección de rehash exitosas"
         },
@@ -82,7 +82,7 @@
             "estado": "PASSED",
             "passed": true,
             "assertions": 2,
-            "duration_ms": 0.784,
+            "duration_ms": 0.616,
             "detected_defect": false,
             "detalle": "Cache-busting ?v=timestamp verificado"
         },
@@ -94,7 +94,7 @@
             "estado": "PASSED",
             "passed": true,
             "assertions": 171,
-            "duration_ms": 0.448,
+            "duration_ms": 1.273,
             "detected_defect": true,
             "detalle": "17 módulos y todas sus reglas de autorización verificadas"
         },
@@ -106,7 +106,7 @@
             "estado": "PASSED",
             "passed": true,
             "assertions": 14,
-            "duration_ms": 0.259,
+            "duration_ms": 0.366,
             "detected_defect": true,
             "detalle": "7 módulos CRUD separan permisos de creación (id vacío) y edición (id con valor)"
         },
@@ -118,7 +118,7 @@
             "estado": "PASSED",
             "passed": true,
             "assertions": 8,
-            "duration_ms": 0.828,
+            "duration_ms": 0.989,
             "detected_defect": true,
             "detalle": "8\/8 selectores CSS de LoginPage coinciden exactamente con Views\/index.php"
         },
@@ -130,7 +130,7 @@
             "estado": "PASSED",
             "passed": true,
             "assertions": 5,
-            "duration_ms": 0.924,
+            "duration_ms": 1.191,
             "detected_defect": true,
             "detalle": "Selectores de apertura\/cierre de caja validados contra las vistas PHP"
         },
@@ -142,7 +142,7 @@
             "estado": "PASSED",
             "passed": true,
             "assertions": 10,
-            "duration_ms": 0.486,
+            "duration_ms": 0.854,
             "detected_defect": true,
             "detalle": "10\/10 selectores interactivos de NuevaVentaPage validados"
         },
@@ -154,7 +154,7 @@
             "estado": "PASSED",
             "passed": true,
             "assertions": 1,
-            "duration_ms": 0.337,
+            "duration_ms": 0.25,
             "detected_defect": false,
             "detalle": "Controlador Clientes.php verificado"
         },
@@ -166,7 +166,7 @@
             "estado": "PASSED",
             "passed": true,
             "assertions": 1,
-            "duration_ms": 0.253,
+            "duration_ms": 0.131,
             "detected_defect": false,
             "detalle": "Controlador Proveedor.php verificado"
         },
@@ -178,7 +178,7 @@
             "estado": "PASSED",
             "passed": true,
             "assertions": 1,
-            "duration_ms": 0.268,
+            "duration_ms": 0.128,
             "detected_defect": false,
             "detalle": "Controlador Medidas.php verificado"
         },
@@ -190,7 +190,7 @@
             "estado": "PASSED",
             "passed": true,
             "assertions": 1,
-            "duration_ms": 0.321,
+            "duration_ms": 0.125,
             "detected_defect": false,
             "detalle": "Controlador Categorias.php verificado"
         },
@@ -202,7 +202,7 @@
             "estado": "PASSED",
             "passed": true,
             "assertions": 1,
-            "duration_ms": 0.225,
+            "duration_ms": 0.127,
             "detected_defect": false,
             "detalle": "Controlador Compras.php verificado"
         },
@@ -214,7 +214,7 @@
             "estado": "PASSED",
             "passed": true,
             "assertions": 1,
-            "duration_ms": 1.727,
+            "duration_ms": 0.134,
             "detected_defect": false,
             "detalle": "Controlador Cotizaciones.php verificado"
         },
@@ -226,7 +226,7 @@
             "estado": "PASSED",
             "passed": true,
             "assertions": 1,
-            "duration_ms": 0.282,
+            "duration_ms": 0.122,
             "detected_defect": false,
             "detalle": "Controlador Apartados.php verificado"
         },
@@ -238,7 +238,7 @@
             "estado": "PASSED",
             "passed": true,
             "assertions": 1,
-            "duration_ms": 0.246,
+            "duration_ms": 0.117,
             "detected_defect": false,
             "detalle": "Controlador Creditos.php verificado"
         },
@@ -250,7 +250,7 @@
             "estado": "PASSED",
             "passed": true,
             "assertions": 1,
-            "duration_ms": 0.267,
+            "duration_ms": 0.118,
             "detected_defect": false,
             "detalle": "Controlador Landing.php verificado"
         },
@@ -262,7 +262,7 @@
             "estado": "PASSED",
             "passed": true,
             "assertions": 1,
-            "duration_ms": 0.248,
+            "duration_ms": 0.118,
             "detected_defect": false,
             "detalle": "Controlador Errors.php verificado"
         }

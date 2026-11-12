@@ -21,9 +21,11 @@ class W3CWebDriverClient
 
     public function startSession(bool $headless = true): string
     {
-        $args = ['--window-size=1920,1080', '--disable-gpu', '--no-sandbox'];
+        $args = ['--window-size=1366,768', '--disable-gpu', '--no-sandbox'];
         if ($headless) {
             $args[] = '--headless=new';
+        } else {
+            $args[] = '--start-maximized';
         }
 
         $payload = [
@@ -68,6 +70,11 @@ class W3CWebDriverClient
         return (string) (reset($val) ?: '');
     }
 
+    public function clearElement(string $elementId): void
+    {
+        $this->request('POST', "/session/{$this->sessionId}/element/{$elementId}/clear", new \stdClass());
+    }
+
     public function sendKeys(string $elementId, string $text): void
     {
         $this->request('POST', "/session/{$this->sessionId}/element/{$elementId}/value", [
@@ -85,6 +92,20 @@ class W3CWebDriverClient
     {
         $res = $this->request('GET', "/session/{$this->sessionId}/element/{$elementId}/text");
         return trim((string) ($res['value'] ?? ''));
+    }
+
+    public function takeScreenshot(string $filePath): bool
+    {
+        $res = $this->request('GET', "/session/{$this->sessionId}/screenshot");
+        $base64 = $res['value'] ?? '';
+        if (!$base64) {
+            return false;
+        }
+        $dir = dirname($filePath);
+        if (!is_dir($dir)) {
+            mkdir($dir, 0777, true);
+        }
+        return file_put_contents($filePath, base64_decode($base64)) !== false;
     }
 
     public function quit(): void
@@ -107,7 +128,7 @@ class W3CWebDriverClient
             CURLOPT_CUSTOMREQUEST => $method,
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_HTTPHEADER => $headers,
-            CURLOPT_TIMEOUT => 15,
+            CURLOPT_TIMEOUT => 20,
         ];
 
         if ($body !== null) {
@@ -126,4 +147,3 @@ class W3CWebDriverClient
         return json_decode($raw, true) ?? [];
     }
 }
-

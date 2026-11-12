@@ -7,3 +7,6 @@ Config/Config.php
 Thumbs.db
 # Credenciales iniciales: nunca subir al repositorio
 DB/usuarios_iniciales.txt
+# Binario local de ChromeDriver
+tests/bin/
+.phpunit.cache/
